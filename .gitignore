@@ -6,3 +6,6 @@ dist/
 .dev.vars
 *.local
 apps/web/.env.production
+/test-results/
+/playwright-report/
+/blob-report/

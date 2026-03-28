@@ -11,6 +11,9 @@ export type Env = {
   ENVIRONMENT: string
   AI_GATEWAY_URL?: string
   ANTHROPIC_API_KEY?: string
+  ECPAY_MERCHANT_ID?: string
+  ECPAY_HASH_KEY?: string
+  ECPAY_HASH_IV?: string
   /** Required for AI Gateway Analytics API — set via: wrangler secret put CLOUDFLARE_API_TOKEN */
   CLOUDFLARE_API_TOKEN?: string
 }
@@ -51,6 +54,7 @@ import toolsRoute from './routes/tools'
 import conversationsRoute from './routes/conversations'
 import authRoute from './routes/auth'
 import analyticsRoute from './routes/analytics'
+import paymentsRoute from './routes/payments'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
 
@@ -62,6 +66,7 @@ app.use('/api/v1/chat/*', authMiddleware)
 app.use('/api/v1/tools/*', authMiddleware)
 app.use('/api/v1/conversations/*', authMiddleware)
 app.use('/api/v1/analytics/*', authMiddleware)
+app.use('/api/v1/payments/*', authMiddleware)
 
 // Rate limiting applied to AI inference routes
 app.use('/api/v1/chat/*', rateLimitMiddleware)
@@ -71,6 +76,7 @@ app.route('/api/v1/chat', chatRoute)
 app.route('/api/v1/tools', toolsRoute)
 app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)
+app.route('/api/v1/payments', paymentsRoute)
 
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'Not found' }, 404))
