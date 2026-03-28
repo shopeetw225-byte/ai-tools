@@ -31,7 +31,17 @@ app.get('/health', (c) => c.json({ ok: true, env: c.env.ENVIRONMENT }))
 import chatRoute from './routes/chat'
 import toolsRoute from './routes/tools'
 import conversationsRoute from './routes/conversations'
+import authRoute from './routes/auth'
 import { rateLimitMiddleware } from './middleware/rate-limit'
+import { authMiddleware } from './middleware/auth'
+
+// Auth routes (public — no auth required)
+app.route('/api/v1/auth', authRoute)
+
+// Protected routes — require valid session
+app.use('/api/v1/chat/*', authMiddleware)
+app.use('/api/v1/tools/*', authMiddleware)
+app.use('/api/v1/conversations/*', authMiddleware)
 
 // Rate limiting applied to AI inference routes
 app.use('/api/v1/chat/*', rateLimitMiddleware)
