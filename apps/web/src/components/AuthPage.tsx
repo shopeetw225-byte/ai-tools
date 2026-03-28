@@ -1,9 +1,11 @@
 import { useState, FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 
 type Mode = 'login' | 'register'
 
 export function AuthPage() {
+  const { t } = useTranslation()
   const { login, register } = useAuth()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
@@ -23,7 +25,7 @@ export function AuthPage() {
         await register(email, password, name || undefined)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -34,9 +36,9 @@ export function AuthPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-            AI Tools
+            {t('app.name')}
           </h1>
-          <p className="text-gray-500 text-sm mt-1">on Cloudflare</p>
+          <p className="text-gray-500 text-sm mt-1">{t('app.tagline')}</p>
         </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -49,7 +51,7 @@ export function AuthPage() {
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
-              Login
+              {t('auth.login')}
             </button>
             <button
               onClick={() => { setMode('register'); setError(null) }}
@@ -59,43 +61,47 @@ export function AuthPage() {
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
-              Register
+              {t('auth.register')}
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'register' && (
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Name (optional)</label>
+                <label className="block text-xs text-gray-400 mb-1">{t('auth.nameLabel')}</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
+                  placeholder={t('auth.namePlaceholder')}
                   className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
                 />
               </div>
             )}
 
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Email</label>
+              <label className="block text-xs text-gray-400 mb-1">{t('auth.emailLabel')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={t('auth.emailPlaceholder')}
                 required
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Password</label>
+              <label className="block text-xs text-gray-400 mb-1">{t('auth.passwordLabel')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={mode === 'register' ? 'At least 8 characters' : '••••••••'}
+                placeholder={
+                  mode === 'register'
+                    ? t('auth.passwordRegisterPlaceholder')
+                    : t('auth.passwordLoginPlaceholder')
+                }
                 required
                 minLength={mode === 'register' ? 8 : undefined}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-500"
@@ -113,7 +119,11 @@ export function AuthPage() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 rounded-lg text-sm transition-colors"
             >
-              {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+              {loading
+                ? t('auth.submitLoading')
+                : mode === 'login'
+                  ? t('auth.signIn')
+                  : t('auth.createAccount')}
             </button>
           </form>
         </div>

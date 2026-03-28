@@ -15,6 +15,9 @@ AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/a1540e7bbaec0f1785a7f339e
 # CLOUDFLARE_API_TOKEN — required for AI Gateway Analytics dashboard
 #   Token needs: AI Gateway Read permission
 #   Create at: https://dash.cloudflare.com/profile/api-tokens
+# ECPAY_MERCHANT_ID — 綠界特店編號
+# ECPAY_HASH_KEY — 綠界 HashKey
+# ECPAY_HASH_IV — 綠界 HashIV
 
 # ─── D1 Database ─────────────────────────────────────────────────────────────
 [[d1_databases]]

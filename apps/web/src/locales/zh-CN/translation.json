@@ -1,167 +1,167 @@
 {
   "app": {
-    "name": "AI 工具箱",
-    "tagline": "基于 Cloudflare"
-  },
-  "nav": {
-    "home": "首页",
-    "tools": "工具",
-    "pricing": "定价",
-    "chat": "对话",
-    "dashboard": "数据",
-    "login": "登录",
-    "signOut": "退出登录"
-  },
-  "buttons": {
-    "start": "开始",
-    "cancel": "取消",
-    "save": "保存",
-    "continue": "继续",
-    "pay": "付款"
-  },
-  "pages": {
-    "home": "首页",
-    "toolsList": "工具列表",
-    "chat": "聊天",
-    "settings": "设置"
+    "name": "AI Tools",
+    "tagline": "on Cloudflare"
   },
   "loading": {
-    "general": "加载中…",
-    "analytics": "加载数据中…",
-    "pleaseWait": "请稍候…"
+    "app": "加载中…",
+    "analytics": "正在加载分析数据…"
+  },
+  "nav": {
+    "chat": "聊天",
+    "tools": "工具",
+    "dashboard": "仪表盘",
+    "signOut": "退出登录",
+    "language": "语言",
+    "localeLabel": "简体中文"
   },
   "auth": {
-    "title": "AI 工具箱",
-    "tagline": "基于 Cloudflare",
     "login": "登录",
     "register": "注册",
     "nameLabel": "名字（可选）",
-    "namePlaceholder": "您的名字",
-    "emailLabel": "电子邮件",
+    "namePlaceholder": "你的名字",
+    "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "密码",
     "passwordLoginPlaceholder": "••••••••",
     "passwordRegisterPlaceholder": "至少 8 个字符",
+    "submitLoading": "请稍候…",
     "signIn": "登录",
-    "createAccount": "创建账号",
-    "unknownError": "发生未知错误"
+    "createAccount": "创建账号"
   },
   "chat": {
-    "title": "AI 对话",
-    "subtitle": "由 Llama 3.1 通过 Workers AI 驱动",
-    "clear": "清除",
-    "emptyState": "开始与 AI 对话",
+    "title": "聊天",
+    "subtitle": "由 Workers AI 上的 Llama 3.1 驱动",
+    "clear": "清空",
+    "emptyTitle": "开始与 AI 对话",
     "suggestions": {
-      "quantum": "用简单的语言解释量子计算",
-      "haiku": "写一首关于 TypeScript 的俳句",
-      "workers": "什么是 Cloudflare Workers？"
+      "simpleQuantum": "用简单方式解释量子计算",
+      "typescriptHaiku": "写一首关于 TypeScript 的俳句",
+      "workersIntro": "Cloudflare Workers 是什么？"
     },
-    "inputPlaceholder": "问任何问题…",
+    "inputPlaceholder": "想问什么都可以…",
     "send": "发送",
-    "sending": "…"
+    "sending": "发送中…"
   },
   "tools": {
     "title": "AI 工具",
     "subtitle": "即时 AI 辅助工具",
-    "runButton": "执行 {{name}}",
-    "running": "执行中…",
-    "result": "结果",
-    "copy": "复制",
-    "copied": "已复制！",
-    "inputExceedsChars": "输入超过最大限制 {{max}} 个字符，请缩短您的输入。",
-    "inputExceedsLines": "输入超过最大限制 {{max}} 行，请缩短您的输入。",
     "summarize": {
       "name": "摘要",
-      "description": "将任何文字压缩成结构化要点",
-      "placeholder": "粘贴要摘要的文字（最多 5,000 字符）…",
+      "description": "把任何文本浓缩成结构化重点",
+      "placeholder": "粘贴要摘要的文本（最多 5,000 字）…"
+    },
+    "translate": {
+      "name": "翻译",
+      "description": "在多种语言之间翻译文本",
+      "placeholder": "输入要翻译的文本（最多 3,000 字）…",
+      "autoDetect": "自动检测",
+      "swap": "交换语言"
+    },
+    "explainCode": {
+      "name": "解释代码",
+      "description": "获取任何代码的结构化说明",
+      "placeholder": "把代码粘贴在这里（最多 2,000 行）…"
+    },
+    "codeLanguage": {
+      "autoDetect": "自动检测"
+    },
+    "summaryLength": {
       "short": "短（约 100 字）",
       "medium": "中（约 300 字）",
       "detailed": "详细（约 500 字）"
     },
-    "translate": {
-      "name": "翻译",
-      "description": "在不同语言之间翻译文字",
-      "placeholder": "输入要翻译的文字（最多 3,000 字符）…",
-      "autoDetect": "自动检测",
-      "swapLanguages": "交换语言"
-    },
-    "explainCode": {
-      "name": "解释代码",
-      "description": "获取任何代码的结构化解释",
-      "placeholder": "粘贴您的代码（最多 2,000 行）…",
-      "autoDetect": "自动检测"
-    }
+    "run": "运行{{name}}",
+    "running": "运行中…",
+    "result": "结果",
+    "copy": "复制",
+    "copied": "已复制！",
+    "inputExceedsChars": "输入超过上限 {{max}} 个字符，请缩短内容。",
+    "inputExceedsLines": "输入超过上限 {{max}} 行，请缩短内容。"
   },
   "dashboard": {
     "title": "AI Gateway",
-    "subtitle": "最近 7 天 · Cloudflare AI Gateway 数据",
+    "subtitle": "最近 7 天 · Cloudflare AI Gateway Analytics",
     "refresh": "↺ 刷新",
+    "notConfigured": "尚未配置 Analytics",
+    "loadError": "加载分析数据失败",
+    "notConfiguredHelp": "请设置 Cloudflare API token 以启用 AI Gateway analytics：",
+    "tokenPermission": "Token 需要 AI Gateway: Read 权限。",
     "retry": "重试",
-    "loading": "加载数据中…",
-    "notConfigured": "Analytics 尚未配置",
-    "failedToLoad": "加载数据失败",
-    "configureToken": "配置您的 Cloudflare API Token 以启用 AI Gateway 数据：",
-    "tokenPermission": "Token 需要 AI Gateway：读取 权限。",
     "metrics": {
       "totalRequests": "总请求数",
-      "totalRequestsSub": "7 天合计",
+      "totalRequestsSub": "7 天总计",
       "avgLatency": "平均延迟",
       "avgLatencySub": "平均响应时间",
       "errorRate": "错误率",
       "errorRateSub": "{{count}} 次失败",
-      "totalCost": "总费用",
-      "totalCostSub": "预估美元"
+      "totalCost": "总成本",
+      "totalCostSub": "估算 USD"
     },
-    "charts": {
-      "dailyVolume": "每日请求量",
-      "modelUsage": "模型使用情况"
-    },
-    "cached": "已缓存 — 每 5 分钟更新"
+    "dailyVolume": "每日请求量",
+    "modelUsage": "模型使用量",
+    "cached": "已缓存，每 5 分钟更新",
+    "errorSuffix": "% 错误"
   },
   "payment": {
-    "title": "付款",
-    "creditCard": "信用卡付款",
-    "atm": "ATM 转账",
-    "atmInstructions": {
-      "title": "ATM 转账说明",
-      "bank": "银行代码",
-      "account": "转账账号",
-      "amount": "转账金额",
-      "deadline": "付款期限",
-      "note": "请在期限内完成转账，逾期订单将自动取消"
+    "back": "返回",
+    "checkout": {
+      "preparing": "正在准备付款，请稍候…",
+      "redirecting": "即将跳转至绿界付款页面…",
+      "doNotClose": "请勿关闭此窗口",
+      "missingParams": "缺少付款信息，请返回重试。",
+      "notLoggedIn": "请先登录后再进行付款。",
+      "createFailed": "创建订单失败，请稍后再试。",
+      "inAppTitle": "请使用外部浏览器",
+      "inAppHint": "检测到您正在 {{browser}} 内打开。为确保付款安全，请复制链接至 Safari 或 Chrome 打开。",
+      "inAppDefault": "应用程序"
     },
-    "cvs": "便利店代码",
-    "success": {
-      "title": "付款成功",
-      "subtitle": "您的订单已确认",
-      "orderNumber": "订单编号",
-      "amount": "付款金额",
-      "transactionId": "交易编号",
-      "backHome": "返回首页",
-      "viewOrder": "查看订单"
+    "result": {
+      "pending": {
+        "title": "付款处理中",
+        "subtitle": "正在等待付款确认，请稍候…"
+      },
+      "success": {
+        "title": "付款成功",
+        "subtitle": "您的订单已完成付款，感谢您的购买！"
+      },
+      "failed": {
+        "title": "付款失败",
+        "subtitle": "付款未能完成，请重试或选择其他付款方式。"
+      },
+      "goToDashboard": "返回仪表盘"
+    }
+  },
+  "pricing": {
+    "title": "选择方案",
+    "subtitle": "升级 Pro 方案，享受无限使用",
+    "free": {
+      "name": "免费方案",
+      "price": "NT$0",
+      "period": "/月",
+      "features": ["每日 10 次免费使用", "基本 AI 工具", "聊天功能"],
+      "cta": "当前方案"
     },
-    "failure": {
-      "title": "付款失败",
-      "subtitle": "请重试或选择其他付款方式",
-      "reason": "失败原因",
-      "retry": "重试付款",
-      "backHome": "返回首页"
+    "pro": {
+      "name": "Pro 方案",
+      "price": "NT$99",
+      "period": "/月",
+      "features": ["无限制使用", "所有 AI 工具", "优先响应", "进阶模型"],
+      "cta": "立即升级"
     },
-    "processing": "付款处理中…",
-    "selectMethod": "选择付款方式",
-    "orderSummary": "订单摘要",
-    "total": "合计",
-    "currency": "TWD",
-    "inAppBrowserWarning": "建议使用外部浏览器完成付款以确保安全",
-    "openExternalBrowser": "在外部浏览器中打开"
+    "paymentMethods": "支持付款方式：信用卡、ATM 转账、超商代码"
+  },
+  "upgrade": {
+    "title": "已达今日免费额度上限",
+    "description": "您今日已使用 {{count}}/{{limit}} 次免费额度",
+    "cta": "升级 Pro 方案 NT$99/月",
+    "dismiss": "稍后再说"
   },
   "errors": {
-    "networkError": "网络连接错误，请稍后再试",
-    "serverError": "服务器发生错误，请稍后再试",
-    "authRequired": "请先登录",
-    "authFailed": "认证失败，请重新登录",
-    "paymentFailed": "付款失败，请重试或选择其他付款方式",
-    "unknownError": "发生未知错误",
-    "inputRequired": "请填写此字段"
+    "generic": "抱歉，系统发生错误，请稍后再试。",
+    "auth": {
+      "loginFailed": "登录失败",
+      "registrationFailed": "注册失败"
+    }
   }
 }

@@ -1,66 +1,104 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useChat } from '../hooks/useChat'
-import { ChatConversation } from './chat/ChatConversation'
-import { ChatComposer } from './chat/ChatComposer'
 
 export function ChatPanel() {
-  const { messages, status, sendMessage, retryLastMessage, stopStreaming, clearChat } = useChat()
-  const [composerValue, setComposerValue] = useState<string | undefined>()
+  const { t } = useTranslation()
+  const { messages, loading, sendMessage, clearChat } = useChat()
+  const [input, setInput] = useState('')
+  const bottomRef = useRef<HTMLDivElement>(null)
 
-  const isDisabled = status === 'submitting' || status === 'streaming'
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
-  function handleSuggestionClick(suggestion: string) {
-    setComposerValue(suggestion)
-  }
-
-  function handleSubmit(message: string) {
-    sendMessage(message)
-    setComposerValue(undefined)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!input.trim()) return
+    sendMessage(input)
+    setInput('')
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
         <div>
-          <h2 className="font-semibold text-white">Chat</h2>
-          <p className="text-xs text-gray-500">Powered by Llama 3.1 via Workers AI</p>
+          <h2 className="font-semibold text-white">{t('chat.title')}</h2>
+          <p className="text-xs text-gray-500">{t('chat.subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
-          {isDisabled && (
-            <button
-              type="button"
-              onClick={stopStreaming}
-              className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
-            >
-              Stop
-            </button>
-          )}
-          {messages.length > 0 && (
-            <button
-              type="button"
-              onClick={clearChat}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={clearChat}
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            {t('chat.clear')}
+          </button>
+        )}
       </div>
 
-      {/* Conversation */}
-      <ChatConversation
-        messages={messages}
-        onSuggestionClick={handleSuggestionClick}
-        onRetry={retryLastMessage}
-      />
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-3">
+            <div className="text-4xl">💬</div>
+            <p className="text-gray-400 text-sm">{t('chat.emptyTitle')}</p>
+            <div className="flex flex-wrap gap-2 justify-center mt-2">
+              {[
+                t('chat.suggestions.simpleQuantum'),
+                t('chat.suggestions.typescriptHaiku'),
+                t('chat.suggestions.workersIntro'),
+              ].map(
+                (suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => { setInput(suggestion); }}
+                    className="text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 hover:border-blue-500 hover:text-blue-400 transition-colors"
+                  >
+                    {suggestion}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  msg.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-br-sm'
+                    : 'bg-gray-800 text-gray-100 rounded-bl-sm'
+                }`}
+              >
+                {msg.content || (msg.streaming ? <span className="animate-pulse">▋</span> : '')}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={bottomRef} />
+      </div>
 
-      {/* Composer */}
-      <ChatComposer
-        onSubmit={handleSubmit}
-        disabled={isDisabled}
-        initialValue={composerValue}
-      />
+      {/* Input */}
+      <form onSubmit={handleSubmit} className="px-4 py-3 border-t border-gray-800">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={loading}
+            placeholder={t('chat.inputPlaceholder')}
+            className="flex-1 bg-gray-800 text-white placeholder-gray-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={!input.trim() || loading}
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+          >
+            {loading ? t('chat.sending') : t('chat.send')}
+          </button>
+        </div>
+      </form>
     </div>
   )
 }

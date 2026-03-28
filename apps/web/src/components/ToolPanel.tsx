@@ -1,68 +1,43 @@
 import { useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 
 type ToolId = 'summarize' | 'translate' | 'explain-code'
 
 type Tool = {
-  name: string
   id: ToolId
-  description: string
-  placeholder: string
   icon: string
   maxChars?: number
   maxLines?: number
 }
 
+type CodeLanguageOption =
+  | { value: string; label: string }
+  | { value: string; labelKey: string }
+
 const TOOLS: Tool[] = [
   {
     id: 'summarize',
-    name: 'Summarize',
-    description: 'Condense any text into structured bullet points',
-    placeholder: 'Paste text to summarize (max 5,000 characters)...',
     icon: '📝',
     maxChars: 5000,
   },
   {
     id: 'translate',
-    name: 'Translate',
-    description: 'Translate text between languages',
-    placeholder: 'Enter text to translate (max 3,000 characters)...',
     icon: '🌐',
     maxChars: 3000,
   },
   {
     id: 'explain-code',
-    name: 'Explain Code',
-    description: 'Get a structured explanation of any code',
-    placeholder: 'Paste your code here (max 2,000 lines)...',
     icon: '💻',
     maxLines: 2000,
   },
-]
-
-const SUMMARY_LENGTHS = [
-  { value: 'short', label: 'Short (~100 chars)' },
-  { value: 'medium', label: 'Medium (~300 chars)' },
-  { value: 'detailed', label: 'Detailed (~500 chars)' },
 ]
 
 const TARGET_LANGUAGES = [
   '繁體中文', '簡體中文', 'English', '日本語', '한국어', 'Español', 'Français', 'Deutsch',
 ]
 
-const SOURCE_LANGUAGES = [
-  { value: 'auto', label: 'Auto-detect' },
-  { value: '繁體中文', label: '繁體中文' },
-  { value: '簡體中文', label: '簡體中文' },
-  { value: 'English', label: 'English' },
-  { value: '日本語', label: '日本語' },
-  { value: '한국어', label: '한국어' },
-  { value: 'Español', label: 'Español' },
-  { value: 'Français', label: 'Français' },
-  { value: 'Deutsch', label: 'Deutsch' },
-]
-
-const CODE_LANGUAGES = [
-  { value: 'auto', label: 'Auto-detect' },
+const CODE_LANGUAGES: CodeLanguageOption[] = [
+  { value: 'auto', labelKey: 'tools.codeLanguage.autoDetect' },
   { value: 'JavaScript', label: 'JavaScript' },
   { value: 'TypeScript', label: 'TypeScript' },
   { value: 'Python', label: 'Python' },
@@ -83,6 +58,7 @@ const CODE_LANGUAGES = [
 const API_BASE = import.meta.env.VITE_API_URL ?? '/api/v1'
 
 export function ToolPanel() {
+  const { t } = useTranslation()
   const [activeTool, setActiveTool] = useState<Tool>(TOOLS[0])
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
@@ -99,6 +75,46 @@ export function ToolPanel() {
 
   // Explain-code options
   const [codeLanguage, setCodeLanguage] = useState('auto')
+
+  const toolLabels = {
+    summarize: {
+      name: t('tools.summarize.name'),
+      description: t('tools.summarize.description'),
+      placeholder: t('tools.summarize.placeholder'),
+    },
+    translate: {
+      name: t('tools.translate.name'),
+      description: t('tools.translate.description'),
+      placeholder: t('tools.translate.placeholder'),
+    },
+    'explain-code': {
+      name: t('tools.explainCode.name'),
+      description: t('tools.explainCode.description'),
+      placeholder: t('tools.explainCode.placeholder'),
+    },
+  } as const
+
+  const summaryLengths = [
+    { value: 'short', label: t('tools.summaryLength.short') },
+    { value: 'medium', label: t('tools.summaryLength.medium') },
+    { value: 'detailed', label: t('tools.summaryLength.detailed') },
+  ]
+
+  const sourceLanguages = [
+    { value: 'auto', label: t('tools.translate.autoDetect') },
+    { value: '繁體中文', label: '繁體中文' },
+    { value: '簡體中文', label: '簡體中文' },
+    { value: 'English', label: 'English' },
+    { value: '日本語', label: '日本語' },
+    { value: '한국어', label: '한국어' },
+    { value: 'Español', label: 'Español' },
+    { value: 'Français', label: 'Français' },
+    { value: 'Deutsch', label: 'Deutsch' },
+  ]
+  const codeLanguages = CODE_LANGUAGES.map((language) => ({
+    value: language.value,
+    label: 'labelKey' in language ? t(language.labelKey) : language.label,
+  }))
 
   const inputLength = input.length
   const inputLines = input.split('\n').length
@@ -171,8 +187,8 @@ export function ToolPanel() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-800">
-        <h2 className="font-semibold text-white">AI Tools</h2>
-        <p className="text-xs text-gray-500">Instant AI-powered utilities</p>
+        <h2 className="font-semibold text-white">{t('tools.title')}</h2>
+        <p className="text-xs text-gray-500">{t('tools.subtitle')}</p>
       </div>
 
       {/* Tool Tabs */}
@@ -188,19 +204,19 @@ export function ToolPanel() {
             }`}
           >
             <span>{tool.icon}</span>
-            {tool.name}
+            {toolLabels[tool.id].name}
           </button>
         ))}
       </div>
 
       {/* Tool Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        <p className="text-xs text-gray-500">{activeTool.description}</p>
+        <p className="text-xs text-gray-500">{toolLabels[activeTool.id].description}</p>
 
         {/* Tool-specific options */}
         {activeTool.id === 'summarize' && (
           <div className="flex gap-1.5">
-            {SUMMARY_LENGTHS.map((len) => (
+            {summaryLengths.map((len) => (
               <button
                 key={len.value}
                 onClick={() => setSummaryLength(len.value)}
@@ -223,7 +239,7 @@ export function ToolPanel() {
               onChange={(e) => setSourceLanguage(e.target.value)}
               className="flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
             >
-              {SOURCE_LANGUAGES.map((lang) => (
+              {sourceLanguages.map((lang) => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
               ))}
             </select>
@@ -231,7 +247,7 @@ export function ToolPanel() {
               onClick={handleSwapLanguages}
               disabled={sourceLanguage === 'auto'}
               className="px-2 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              title="Swap languages"
+              title={t('tools.translate.swap')}
             >
               ⇄
             </button>
@@ -253,7 +269,7 @@ export function ToolPanel() {
             onChange={(e) => setCodeLanguage(e.target.value)}
             className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
           >
-            {CODE_LANGUAGES.map((lang) => (
+            {codeLanguages.map((lang) => (
               <option key={lang.value} value={lang.value}>{lang.label}</option>
             ))}
           </select>
@@ -264,7 +280,7 @@ export function ToolPanel() {
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={activeTool.placeholder}
+            placeholder={toolLabels[activeTool.id].placeholder}
             rows={activeTool.id === 'explain-code' ? 10 : 6}
             className={`w-full bg-gray-800 text-white placeholder-gray-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 resize-none ${
               activeTool.id === 'explain-code' ? 'font-mono text-xs' : ''
@@ -280,11 +296,11 @@ export function ToolPanel() {
 
         {isOverLimit && (
           <p className="text-xs text-red-400">
-            Input exceeds the maximum{' '}
             {activeTool.maxChars
-              ? `of ${activeTool.maxChars.toLocaleString()} characters`
-              : `of ${activeTool.maxLines?.toLocaleString()} lines`
-            }. Please shorten your input.
+              ? t('tools.inputExceedsChars', { max: activeTool.maxChars.toLocaleString() })
+              : t('tools.inputExceedsLines', {
+                  max: activeTool.maxLines?.toLocaleString() ?? '0',
+                })}
           </p>
         )}
 
@@ -293,7 +309,7 @@ export function ToolPanel() {
           disabled={!input.trim() || loading || isOverLimit}
           className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
         >
-          {loading ? 'Running...' : `Run ${activeTool.name}`}
+          {loading ? t('tools.running') : t('tools.run', { name: toolLabels[activeTool.id].name })}
         </button>
 
         {error && (
@@ -305,12 +321,12 @@ export function ToolPanel() {
         {output && (
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">Result</p>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{t('tools.result')}</p>
               <button
                 onClick={handleCopy}
                 className="text-xs text-gray-500 hover:text-gray-300 transition-colors px-2 py-1 rounded hover:bg-gray-800"
               >
-                {copied ? 'Copied!' : 'Copy'}
+                {copied ? t('tools.copied') : t('tools.copy')}
               </button>
             </div>
             <div className="rounded-xl bg-gray-800 px-4 py-3 text-sm text-gray-100 leading-relaxed whitespace-pre-wrap">
