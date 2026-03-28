@@ -66,7 +66,14 @@ app.use('/api/v1/chat/*', authMiddleware)
 app.use('/api/v1/tools/*', authMiddleware)
 app.use('/api/v1/conversations/*', authMiddleware)
 app.use('/api/v1/analytics/*', authMiddleware)
-app.use('/api/v1/payments/*', authMiddleware)
+// ECPay callbacks are public: /ecpay/return (server webhook) and /ecpay/result (browser redirect)
+app.use('/api/v1/payments/*', async (c, next) => {
+  const path = c.req.path
+  if (path === '/api/v1/payments/ecpay/return' || path === '/api/v1/payments/ecpay/result') {
+    return next()
+  }
+  return authMiddleware(c, next)
+})
 
 // Rate limiting applied to AI inference routes
 app.use('/api/v1/chat/*', rateLimitMiddleware)

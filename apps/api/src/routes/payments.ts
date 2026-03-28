@@ -4,6 +4,7 @@ import {
   buildEcpayCreateOrderPayload,
   formatMerchantTradeDate,
   generateMerchantTradeNo,
+  verifyCheckMacValue,
   type EcpayPaymentType,
 } from '../lib/ecpay'
 
@@ -20,6 +21,132 @@ const ALLOWED_PAYMENT_TYPES = new Set<EcpayPaymentType>([
 const ECPAY_STAGE_URL = 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5'
 const ECPAY_PROD_URL = 'https://payment.ecpay.com.tw/Cashier/AioCheckOut/V5'
 const ECPAY_RETURN_PATH = '/api/v1/payments/ecpay/return'
+const ECPAY_ORDER_RESULT_PATH = '/api/v1/payments/ecpay/result'
+
+// Webhook rate limit: 60 req/min per IP
+const WEBHOOK_WINDOW_MS = 60_000
+const WEBHOOK_MAX_REQUESTS = 60
+
+async function applyWebhookRateLimit(c: { req: { header(n: string): string | undefined }; env: Env }): Promise<boolean> {
+  const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'unknown'
+  const bucket = Math.floor(Date.now() / WEBHOOK_WINDOW_MS)
+  const key = `rl:webhook:${ip}:${bucket}`
+
+  try {
+    const current = await c.env.KV.get(key)
+    const count = current ? parseInt(current, 10) : 0
+    if (count >= WEBHOOK_MAX_REQUESTS) return false
+    await c.env.KV.put(key, String(count + 1), { expirationTtl: 120 })
+  } catch {
+    // Non-fatal: allow if KV unavailable
+  }
+
+  return true
+}
+
+// ─── Public ECPay callbacks (no auth required) ────────────────────────────────
+
+// ReturnURL: ECPay server-to-server callback after payment
+payments.post('/ecpay/return', async (c) => {
+  const allowed = await applyWebhookRateLimit(c as never)
+  if (!allowed) return c.text('0|Rate limit exceeded', 429)
+
+  if (!c.env.ECPAY_HASH_KEY || !c.env.ECPAY_HASH_IV) {
+    return c.text('0|ECPay secrets not configured', 500)
+  }
+
+  const formData = await c.req.parseBody()
+  const payload: Record<string, string> = {}
+  for (const [key, value] of Object.entries(formData)) {
+    if (typeof value === 'string') payload[key] = value
+  }
+
+  const merchantTradeNo = payload['MerchantTradeNo']
+  if (!merchantTradeNo || !payload['CheckMacValue']) {
+    return c.text('0|Missing required fields', 400)
+  }
+
+  const valid = await verifyCheckMacValue(payload, {
+    hashKey: c.env.ECPAY_HASH_KEY,
+    hashIv: c.env.ECPAY_HASH_IV,
+  })
+
+  if (!valid) {
+    return c.text('0|CheckMacValue invalid', 400)
+  }
+
+  const rtnCode = parseInt(payload['RtnCode'] ?? '0', 10)
+  const tradeNo = payload['TradeNo'] ?? ''
+
+  // Idempotency: check if this exact notification already processed
+  const existing = await c.env.DB
+    .prepare('SELECT id FROM payment_notifications WHERE merchant_trade_no = ? AND trade_no = ? AND rtn_code = ? LIMIT 1')
+    .bind(merchantTradeNo, tradeNo, rtnCode)
+    .first<{ id: string }>()
+
+  if (existing) {
+    return c.text('1|OK')
+  }
+
+  // Insert payment_notification record
+  await c.env.DB
+    .prepare(
+      `INSERT INTO payment_notifications
+         (merchant_trade_no, trade_no, rtn_code, rtn_msg, payment_type, trade_amt, raw_payload, verified)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1)`,
+    )
+    .bind(
+      merchantTradeNo,
+      tradeNo,
+      rtnCode,
+      payload['RtnMsg'] ?? null,
+      payload['PaymentType'] ?? null,
+      payload['TradeAmt'] ? parseInt(payload['TradeAmt'], 10) : null,
+      JSON.stringify(payload),
+    )
+    .run()
+
+  // Update order status (only transition from pending)
+  const newStatus = rtnCode === 1 ? 'paid' : 'failed'
+  await c.env.DB
+    .prepare(
+      `UPDATE orders SET status = ?, updated_at = datetime('now')
+       WHERE merchant_trade_no = ? AND status = 'pending'`,
+    )
+    .bind(newStatus, merchantTradeNo)
+    .run()
+
+  return c.text('1|OK')
+})
+
+// OrderResultURL: browser redirect from ECPay (POST with result data)
+// Verifies signature, then redirects to frontend result page
+payments.post('/ecpay/result', async (c) => {
+  const formData = await c.req.parseBody()
+  const payload: Record<string, string> = {}
+  for (const [key, value] of Object.entries(formData)) {
+    if (typeof value === 'string') payload[key] = value
+  }
+
+  const merchantTradeNo = payload['MerchantTradeNo']
+  if (!merchantTradeNo) {
+    return c.redirect('/zh-TW/payment/result?status=error', 302)
+  }
+
+  const order = await c.env.DB
+    .prepare('SELECT id, status FROM orders WHERE merchant_trade_no = ? LIMIT 1')
+    .bind(merchantTradeNo)
+    .first<{ id: string; status: string }>()
+
+  if (!order) {
+    return c.redirect('/zh-TW/payment/result?status=error', 302)
+  }
+
+  const uiStatus = order.status === 'paid' ? 'success' : order.status === 'failed' ? 'failed' : 'pending'
+  return c.redirect(`/zh-TW/payment/result?orderId=${order.id}&status=${uiStatus}`, 302)
+})
+
+// ─── Protected routes (require auth) ─────────────────────────────────────────
 
 payments.post('/create', async (c) => {
   const body = await c.req.json<{
@@ -57,6 +184,7 @@ payments.post('/create', async (c) => {
   const merchantTradeNo = generateMerchantTradeNo()
   const merchantTradeDate = formatMerchantTradeDate(new Date())
   const returnUrl = new URL(ECPAY_RETURN_PATH, c.req.url).toString()
+  const orderResultUrl = new URL(ECPAY_ORDER_RESULT_PATH, c.req.url).toString()
 
   const insertedOrder = await c.env.DB.prepare(
     `INSERT INTO orders (merchant_trade_no, user_id, total_amount, status, choose_payment)
@@ -83,6 +211,7 @@ payments.post('/create', async (c) => {
       itemName,
       choosePayment,
       returnUrl,
+      orderResultUrl,
     },
   )
 
@@ -92,6 +221,35 @@ payments.post('/create', async (c) => {
     serviceUrl: payload.serviceUrl,
     fields: payload.fields,
   })
+})
+
+payments.get('/orders/:id', async (c) => {
+  const userId = (c.get('userId' as never) as string | undefined)?.trim()
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  const orderId = c.req.param('id')
+  const order = await c.env.DB
+    .prepare(
+      'SELECT id, merchant_trade_no, total_amount, status, choose_payment, created_at, updated_at FROM orders WHERE id = ? AND user_id = ?',
+    )
+    .bind(orderId, userId)
+    .first<{
+      id: string
+      merchant_trade_no: string
+      total_amount: number
+      status: string
+      choose_payment: string
+      created_at: string
+      updated_at: string
+    }>()
+
+  if (!order) {
+    return c.json({ error: 'Order not found' }, 404)
+  }
+
+  return c.json(order)
 })
 
 export default payments

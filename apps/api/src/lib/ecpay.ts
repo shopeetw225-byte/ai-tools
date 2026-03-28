@@ -27,6 +27,7 @@ export type CreateOrderInput = {
   itemName: string
   choosePayment: EcpayPaymentType
   returnUrl: string
+  orderResultUrl?: string
 }
 
 export type EcpayCreateOrderFields = {
@@ -38,6 +39,7 @@ export type EcpayCreateOrderFields = {
   TradeDesc: string
   ItemName: string
   ReturnURL: string
+  OrderResultURL?: string
   ChoosePayment: EcpayPaymentType
   EncryptType: 1
   CheckMacValue: string
@@ -106,11 +108,21 @@ export async function generateCheckMacValue(
   return hashed.toUpperCase()
 }
 
+export async function verifyCheckMacValue(
+  payload: Record<string, string>,
+  secrets: { hashKey: string; hashIv: string },
+): Promise<boolean> {
+  const { CheckMacValue, ...fields } = payload
+  if (!CheckMacValue) return false
+  const expected = await generateCheckMacValue(fields, secrets)
+  return expected === CheckMacValue.toUpperCase()
+}
+
 export async function buildEcpayCreateOrderPayload(
   config: EcpayConfig,
   input: CreateOrderInput,
 ): Promise<{ serviceUrl: string; fields: EcpayCreateOrderFields }> {
-  const baseFields = {
+  const baseFields: Record<string, string | number> = {
     MerchantID: config.merchantId,
     MerchantTradeNo: input.merchantTradeNo,
     MerchantTradeDate: input.merchantTradeDate,
@@ -123,6 +135,10 @@ export async function buildEcpayCreateOrderPayload(
     EncryptType: 1 as const,
   }
 
+  if (input.orderResultUrl) {
+    baseFields['OrderResultURL'] = input.orderResultUrl
+  }
+
   const checkMacValue = await generateCheckMacValue(baseFields, {
     hashKey: config.hashKey,
     hashIv: config.hashIv,
@@ -131,7 +147,7 @@ export async function buildEcpayCreateOrderPayload(
   return {
     serviceUrl: config.serviceUrl,
     fields: {
-      ...baseFields,
+      ...(baseFields as Omit<EcpayCreateOrderFields, 'CheckMacValue'>),
       CheckMacValue: checkMacValue,
     },
   }
