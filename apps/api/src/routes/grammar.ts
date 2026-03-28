@@ -12,14 +12,26 @@ For each error found, return a JSON array of correction objects. Each object mus
 - "corrected": the corrected version of that substring
 - "explanation": a brief explanation in Traditional Chinese (繁體中文) of why this is an error and how it was fixed
 
-If there are no errors, return an empty array.
+If there are no errors, return an empty array: []
 
-IMPORTANT:
-- Return ONLY a valid JSON array, no markdown, no code fences, no extra text.
+RULES:
+- Return ONLY a valid JSON array. No markdown, no code fences, no extra text.
 - "original" must be an exact substring match from the input text.
 - Keep explanations concise (one sentence).
 - Focus on: grammar errors, spelling mistakes, punctuation issues, subject-verb agreement, tense consistency, article usage, preposition errors.
-- Do NOT rewrite for style unless there is a clear grammatical mistake.`
+- Do NOT flag correct English as errors. Only flag genuine mistakes.
+- Do NOT rewrite for style unless there is a clear grammatical mistake.
+
+EXAMPLES:
+
+Input: "She dont likes cats"
+Output: [{"original":"dont likes","corrected":"doesn't like","explanation":"主詞 She 為第三人稱單數，助動詞應使用 doesn't，且 like 不需加 s。"}]
+
+Input: "I has went to school"
+Output: [{"original":"has went","corrected":"have gone","explanation":"主詞 I 搭配 have（非 has），且 go 的過去分詞為 gone。"},{"original":"I has","corrected":"I have","explanation":"第一人稱 I 應使用 have 而非 has。"}]
+
+Input: "The weather is nice today."
+Output: []`
 
 interface GrammarRequest {
   text: string
@@ -38,10 +50,21 @@ function parseCorrections(raw: string): GrammarCorrection[] {
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '')
   }
 
+  // Try to extract JSON array if the model added extra text around it
+  if (!cleaned.startsWith('[')) {
+    const arrMatch = cleaned.match(/\[[\s\S]*\]/)
+    if (arrMatch) {
+      cleaned = arrMatch[0]
+    }
+  }
+
   try {
     const parsed = JSON.parse(cleaned)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
+    if (!Array.isArray(parsed)) {
+      console.warn('grammar.parseCorrections: model returned non-array JSON', { type: typeof parsed, raw: raw.slice(0, 200) })
+      return []
+    }
+    const valid = parsed.filter(
       (item: unknown): item is GrammarCorrection =>
         typeof item === 'object' &&
         item !== null &&
@@ -49,7 +72,12 @@ function parseCorrections(raw: string): GrammarCorrection[] {
         typeof (item as GrammarCorrection).corrected === 'string' &&
         typeof (item as GrammarCorrection).explanation === 'string',
     )
-  } catch {
+    if (valid.length < parsed.length) {
+      console.warn('grammar.parseCorrections: filtered out malformed items', { total: parsed.length, valid: valid.length })
+    }
+    return valid
+  } catch (e) {
+    console.warn('grammar.parseCorrections: JSON parse failed', { error: String(e), raw: raw.slice(0, 300) })
     return []
   }
 }
@@ -119,7 +147,7 @@ grammar.post('/', async (c) => {
       async (signal) => {
         const opts = gatewayOptions ? { ...gatewayOptions, signal } : { signal }
         return (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
-          '@cf/meta/llama-3.1-8b-instruct',
+          '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
           {
             messages: [
               { role: 'system', content: SYSTEM_PROMPT },
