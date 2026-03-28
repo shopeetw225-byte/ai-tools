@@ -30,6 +30,46 @@ const FRIENDLY_CHAT_ERROR =
 
 const chat = new Hono<{ Bindings: Env }>()
 
+chat.get('/models', (c) => {
+  const models = [
+    { id: 'workers-ai', name: 'Llama 3.1 8B', provider: 'workers-ai', available: true },
+    { id: 'claude-haiku', name: 'Claude 3 Haiku', provider: 'anthropic', available: !!c.env.ANTHROPIC_API_KEY },
+    { id: 'claude-sonnet', name: 'Claude 3.5 Sonnet', provider: 'anthropic', available: !!c.env.ANTHROPIC_API_KEY },
+  ]
+  return c.json({ models })
+})
+
+chat.post('/history', async (c) => {
+  const userId = c.get('userId' as never) as string
+  const body = await c.req.json<{ conversationId: string }>()
+
+  if (!body.conversationId) {
+    return c.json({ error: 'conversationId required' }, 400)
+  }
+
+  try {
+    const conv = await c.env.DB.prepare(
+      `SELECT id, title, model, created_at, updated_at FROM conversations WHERE id = ? AND user_id = ?`
+    )
+      .bind(body.conversationId, userId)
+      .first<{ id: string; title: string; model: string; created_at: string; updated_at: string }>()
+
+    if (!conv) {
+      return c.json({ error: 'Conversation not found' }, 404)
+    }
+
+    const { results: messages } = await c.env.DB.prepare(
+      `SELECT id, role, content, created_at FROM messages WHERE conversation_id = ? ORDER BY created_at ASC`
+    )
+      .bind(body.conversationId)
+      .all<{ id: string; role: string; content: string; created_at: string }>()
+
+    return c.json({ conversation: conv, messages })
+  } catch {
+    return c.json({ error: 'Failed to load history' }, 500)
+  }
+})
+
 chat.post('/', async (c) => {
   const body = await c.req.json<{
     messages: Message[]

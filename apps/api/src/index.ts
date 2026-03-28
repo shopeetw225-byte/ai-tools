@@ -64,6 +64,7 @@ app.route('/api/v1/auth', authRoute)
 
 // Protected routes — require valid session
 app.use('/api/v1/chat/*', authMiddleware)
+app.use('/api/v1/models', authMiddleware)
 app.use('/api/v1/tools/*', authMiddleware)
 app.use('/api/v1/conversations/*', authMiddleware)
 app.use('/api/v1/analytics/*', authMiddleware)
@@ -85,6 +86,15 @@ app.use('/api/v1/chat/*', usageQuotaMiddleware)
 app.use('/api/v1/tools/*', usageQuotaMiddleware)
 
 app.route('/api/v1/chat', chatRoute)
+// Alias: GET /api/v1/models proxies to the chat route's /models handler
+app.get('/api/v1/models', async (c) => {
+  const models = [
+    { id: 'workers-ai', name: 'Llama 3.1 8B', provider: 'workers-ai', available: true },
+    { id: 'claude-haiku', name: 'Claude 3 Haiku', provider: 'anthropic', available: !!c.env.ANTHROPIC_API_KEY },
+    { id: 'claude-sonnet', name: 'Claude 3.5 Sonnet', provider: 'anthropic', available: !!c.env.ANTHROPIC_API_KEY },
+  ]
+  return c.json({ models })
+})
 app.route('/api/v1/tools', toolsRoute)
 app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)
