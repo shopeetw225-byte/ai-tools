@@ -7,6 +7,116 @@
  *  - Anthropic Claude (via AI Gateway proxy)
  */
 
+export const AI_MAX_ATTEMPTS = 3
+export const AI_REQUEST_TIMEOUT_MS = 30_000
+const AI_RETRY_BASE_DELAY_MS = 250
+
+type RetryOptions = {
+  maxAttempts?: number
+  timeoutMs?: number
+  baseDelayMs?: number
+  sleep?: (ms: number) => Promise<void>
+  onError?: (context: {
+    attempt: number
+    maxAttempts: number
+    error: AIRequestError
+  }) => void
+}
+
+type AIRequestErrorOptions = {
+  retryable?: boolean
+  status?: number
+  cause?: unknown
+}
+
+export class AIRequestError extends Error {
+  retryable: boolean
+  status?: number
+
+  constructor(message: string, options: AIRequestErrorOptions = {}) {
+    super(message, options.cause ? { cause: options.cause } : undefined)
+    this.name = 'AIRequestError'
+    this.retryable = options.retryable ?? false
+    this.status = options.status
+  }
+}
+
+export class AIRequestTimeoutError extends AIRequestError {
+  constructor(timeoutMs: number, cause?: unknown) {
+    super(`AI request timed out after ${timeoutMs}ms`, {
+      retryable: true,
+      cause,
+    })
+    this.name = 'AIRequestTimeoutError'
+  }
+}
+
+function isRetryableStatus(status?: number): boolean {
+  return status === 408 || status === 429 || (status !== undefined && status >= 500)
+}
+
+function normalizeAIError(err: unknown, timeoutMs: number): AIRequestError {
+  if (err instanceof AIRequestError) return err
+  if (err instanceof DOMException && err.name === 'AbortError') {
+    return new AIRequestTimeoutError(timeoutMs, err)
+  }
+
+  const message = err instanceof Error ? err.message : String(err)
+  return new AIRequestError(message, {
+    retryable: /\b(fetch|network|timeout|timed out|socket|connection|temporar)/i.test(message),
+    cause: err,
+  })
+}
+
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms)
+  })
+}
+
+export async function executeWithRetry<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  options: RetryOptions = {},
+): Promise<T> {
+  const maxAttempts = options.maxAttempts ?? AI_MAX_ATTEMPTS
+  const timeoutMs = options.timeoutMs ?? AI_REQUEST_TIMEOUT_MS
+  const baseDelayMs = options.baseDelayMs ?? AI_RETRY_BASE_DELAY_MS
+  const sleep = options.sleep ?? wait
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const controller = new AbortController()
+    const timeoutError = new AIRequestTimeoutError(timeoutMs)
+    let timeout: ReturnType<typeof setTimeout> | undefined
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeout = setTimeout(() => {
+        controller.abort(timeoutError)
+        reject(timeoutError)
+      }, timeoutMs)
+    })
+
+    try {
+      return await Promise.race([operation(controller.signal), timeoutPromise])
+    } catch (err) {
+      const normalized =
+        controller.signal.aborted && controller.signal.reason instanceof AIRequestError
+          ? controller.signal.reason
+          : normalizeAIError(err, timeoutMs)
+
+      options.onError?.({ attempt, maxAttempts, error: normalized })
+
+      if (!normalized.retryable || attempt === maxAttempts) {
+        throw normalized
+      }
+
+      await sleep(baseDelayMs * 2 ** (attempt - 1))
+    } finally {
+      if (timeout) clearTimeout(timeout)
+    }
+  }
+
+  throw new AIRequestError('AI request failed after exhausting retries')
+}
+
 /**
  * Extract the gateway name from a full Cloudflare AI Gateway URL.
  * URL format: https://gateway.ai.cloudflare.com/v1/{account}/{gateway-name}
@@ -41,10 +151,12 @@ export async function callExternalAI(
   body: unknown,
   apiKey: string,
   extraHeaders?: Record<string, string>,
+  signal?: AbortSignal,
 ): Promise<Response> {
   const url = `${gatewayUrl}/${provider}${path}`
   return fetch(url, {
     method: 'POST',
+    signal,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
@@ -63,6 +175,7 @@ export async function* streamAnthropicGateway(
   apiKey: string,
   messages: Array<{ role: string; content: string }>,
   model = 'claude-3-haiku-20240307',
+  options: RetryOptions = {},
 ): AsyncGenerator<string> {
   const systemMsg = messages.find((m) => m.role === 'system')
   const userMessages = messages.filter((m) => m.role !== 'system')
@@ -75,26 +188,47 @@ export async function* streamAnthropicGateway(
     stream: true,
   }
 
-  const res = await callExternalAI(
-    gatewayUrl,
-    'anthropic',
-    '/v1/messages',
-    body,
-    apiKey,
-    {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      // AI Gateway requires Bearer token in Authorization; Anthropic also
-      // accepts x-api-key — include both for gateway compatibility
+  const res = await executeWithRetry(
+    async (signal) => {
+      const response = await callExternalAI(
+        gatewayUrl,
+        'anthropic',
+        '/v1/messages',
+        body,
+        apiKey,
+        {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          // AI Gateway requires Bearer token in Authorization; Anthropic also
+          // accepts x-api-key — include both for gateway compatibility
+        },
+        signal,
+      )
+
+      if (!response.ok || !response.body) {
+        const errText = await response.text().catch(() => response.statusText)
+        throw new AIRequestError(
+          `Anthropic API error ${response.status}: ${errText}`,
+          {
+            retryable: isRetryableStatus(response.status),
+            status: response.status,
+          },
+        )
+      }
+
+      return response
     },
+    options,
   )
 
-  if (!res.ok || !res.body) {
-    const errText = await res.text().catch(() => res.statusText)
-    throw new Error(`Anthropic API error ${res.status}: ${errText}`)
+  const responseBody = res.body
+  if (!responseBody) {
+    throw new AIRequestError('Anthropic API response body was missing', {
+      retryable: true,
+    })
   }
 
-  const reader = res.body.getReader()
+  const reader = responseBody.getReader()
   const decoder = new TextDecoder()
 
   while (true) {

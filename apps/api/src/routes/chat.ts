@@ -2,6 +2,10 @@ import { Hono } from 'hono'
 import { stream } from 'hono/streaming'
 import type { Env } from '../index'
 import {
+  AI_MAX_ATTEMPTS,
+  AIRequestError,
+  AI_REQUEST_TIMEOUT_MS,
+  executeWithRetry,
   streamAnthropicGateway,
   workersAIGatewayOptions,
 } from '../lib/ai-gateway'
@@ -19,6 +23,9 @@ const CLAUDE_MODELS: Record<string, string> = {
   'claude-haiku': 'claude-3-haiku-20240307',
   'claude-sonnet': 'claude-3-5-sonnet-20241022',
 }
+
+const FRIENDLY_CHAT_ERROR =
+  "Sorry, I couldn't generate a response right now. Please try again."
 
 const chat = new Hono<{ Bindings: Env }>()
 
@@ -94,6 +101,21 @@ chat.post('/', async (c) => {
     c,
     async (s) => {
       let fullResponse = ''
+      const provider = useAnthropic ? 'anthropic' : 'workers-ai'
+
+      const logAIError = (stage: string, error: AIRequestError, attempt?: number) => {
+        console.error('chat.ai_error', {
+          stage,
+          provider,
+          model,
+          attempt,
+          maxAttempts: AI_MAX_ATTEMPTS,
+          retryable: error.retryable,
+          status: error.status ?? null,
+          message: error.message,
+          conversationId: conversationId ?? null,
+        })
+      }
 
       try {
         if (useAnthropic) {
@@ -104,6 +126,13 @@ chat.post('/', async (c) => {
             c.env.ANTHROPIC_API_KEY!,
             messages,
             anthropicModel,
+            {
+              timeoutMs: AI_REQUEST_TIMEOUT_MS,
+              maxAttempts: AI_MAX_ATTEMPTS,
+              onError: ({ attempt, error }) => {
+                logAIError('gateway_request', error, attempt)
+              },
+            },
           )) {
             fullResponse += token
             await s.write(
@@ -113,10 +142,20 @@ chat.post('/', async (c) => {
         } else {
           // Workers AI — route through AI Gateway when URL is configured
           const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
-          const aiStream = await (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
-            WORKERS_AI_MODEL,
-            { messages, stream: true },
-            gatewayOptions,
+          const aiStream = await executeWithRetry(
+            async () =>
+              (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+                WORKERS_AI_MODEL,
+                { messages, stream: true },
+                gatewayOptions,
+              ),
+            {
+              timeoutMs: AI_REQUEST_TIMEOUT_MS,
+              maxAttempts: AI_MAX_ATTEMPTS,
+              onError: ({ attempt, error }) => {
+                logAIError('workers_ai_request', error, attempt)
+              },
+            },
           )
 
           const reader = (aiStream as ReadableStream<Uint8Array>).getReader()
@@ -147,7 +186,23 @@ chat.post('/', async (c) => {
           }
         }
       } catch (err) {
-        await s.write(`data: ${JSON.stringify({ error: String(err) })}\n\n`)
+        const normalized =
+          err instanceof AIRequestError
+            ? err
+            : new AIRequestError(err instanceof Error ? err.message : String(err), {
+                retryable: false,
+                cause: err,
+              })
+        logAIError('chat_stream_failed', normalized)
+        fullResponse += FRIENDLY_CHAT_ERROR
+        await s.write(
+          `data: ${JSON.stringify({
+            text: FRIENDLY_CHAT_ERROR,
+            error: 'chat_generation_failed',
+            conversationId,
+            model,
+          })}\n\n`,
+        )
       } finally {
         // Persist assistant reply
         try {
