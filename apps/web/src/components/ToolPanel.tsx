@@ -142,9 +142,13 @@ export function ToolPanel() {
         options.language = codeLanguage
       }
 
+      const token = localStorage.getItem('ai_tools_token')
       const res = await fetch(`${API_BASE}/api/v1/tools/${activeTool.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify({ input, options }),
       })
 

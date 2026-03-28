@@ -149,9 +149,13 @@ export function useChat() {
     abortRef.current = new AbortController()
 
     try {
+      const token = localStorage.getItem('ai_tools_token')
       const res = await fetch(`${API_BASE}/api/v1/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify({ messages: transcript, conversationId }),
         signal: abortRef.current.signal,
       })
@@ -236,9 +240,13 @@ export function useChat() {
     abortRef.current = new AbortController()
 
     try {
+      const token = localStorage.getItem('ai_tools_token')
       const res = await fetch(`${API_BASE}/api/v1/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
         body: JSON.stringify({ messages: transcript, conversationId }),
         signal: abortRef.current.signal,
       })

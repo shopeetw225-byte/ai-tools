@@ -34,8 +34,12 @@ export function useAnalytics() {
     setLoading(true)
     setError(null)
     try {
+      const token = localStorage.getItem('ai_tools_token')
       const res = await fetch(`${API_BASE}/api/v1/analytics/gateway`, {
         credentials: 'include',
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       })
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string }
