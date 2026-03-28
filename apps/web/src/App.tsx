@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChatPanel } from './components/ChatPanel'
 import { ToolPanel } from './components/ToolPanel'
-import { AuthPage } from './components/AuthPage'
 import { DashboardPanel } from './components/DashboardPanel'
 import { PaymentCheckoutPage } from './components/PaymentCheckoutPage'
 import { PaymentResultPage } from './components/PaymentResultPage'
@@ -14,6 +13,7 @@ import { UsageProgress } from './components/UsageProgress'
 import { EngagementUpsell } from './components/EngagementUpsell'
 import { ResumeOptimizer } from './components/ResumeOptimizer'
 import { GrammarChecker } from './components/GrammarChecker'
+import { LandingPage } from './components/LandingPage'
 import { useAuth } from './hooks/useAuth'
 import { useUsage } from './hooks/useUsage'
 import { useStreak } from './hooks/useStreak'
@@ -68,7 +68,7 @@ function AppShell() {
     if (currentPath.endsWith('/privacy')) {
       return <PrivacyPage />
     }
-    return <AuthPage />
+    return <LandingPage />
   }
 
   const changeLanguage = (language: AppLanguage) => {

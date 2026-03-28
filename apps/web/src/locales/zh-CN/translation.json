@@ -236,6 +236,48 @@
     "quota": "今日 {{used}}/{{limit}} 次",
     "maxChars": "超过上限 {{max}} 字符，请缩短内容"
   },
+  "landing": {
+    "hero": {
+      "title": "用 AI 读懂世界，工作快十倍",
+      "subtitle": "专为你打造的 AI 工具箱——聊天、摘要、翻译、简历优化、语法校正，一站搞定",
+      "cta": "免费开始使用",
+      "secondaryCta": "查看定价",
+      "freeNote": "免费账号每天可使用 10 次，无需信用卡"
+    },
+    "features": {
+      "title": "五大 AI 工具，满足你的需求",
+      "subtitle": "从日常对话到专业工作，AI 帮你提升效率",
+      "chat": {
+        "title": "AI 聊天",
+        "desc": "和 AI 自由对话，解答任何问题。由 Cloudflare Workers AI 驱动，响应快速稳定。"
+      },
+      "resume": {
+        "title": "简历优化",
+        "desc": "粘贴简历，AI 帮你强化关键词、量化成就、优化句式，让简历更专业。"
+      },
+      "grammar": {
+        "title": "英文语法校正",
+        "desc": "粘贴英文文本，AI 自动找出语法错误并提供修正建议，写作更有信心。"
+      },
+      "tools": {
+        "title": "AI 工具箱",
+        "desc": "摘要、翻译、代码解释——三合一工具面板，一键搞定日常任务。"
+      },
+      "dashboard": {
+        "title": "使用仪表盘",
+        "desc": "追踪你的使用量与 AI 分析记录，透明掌握每一次请求。"
+      }
+    },
+    "pricing": {
+      "title": "简单定价，没有隐藏费用",
+      "subtitle": "先免费试用，满意再升级",
+      "cta": "立即升级 Pro"
+    },
+    "finalCta": {
+      "title": "准备好提升工作效率了吗？",
+      "subtitle": "免费注册，马上体验 AI 工具的威力"
+    }
+  },
   "errors": {
     "generic": "抱歉，系统发生错误，请稍后再试。",
     "copyFailed": "复制失败，请手动选取文字复制。",
