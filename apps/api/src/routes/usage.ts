@@ -14,7 +14,17 @@ usage.get('/today', async (c) => {
     .bind(userId)
     .first<{ plan: string; expires_at: string | null; trial_started_at: string | null; trial_used: number }>()
 
-  const isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) >= new Date())
+  let isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) >= new Date())
+
+  // If pro subscription has expired, downgrade to free plan
+  if (sub?.plan === 'pro' && sub.expires_at && new Date(sub.expires_at) < new Date()) {
+    await c.env.DB
+      .prepare(`UPDATE subscriptions SET plan = 'free', expires_at = NULL, trial_started_at = NULL, updated_at = datetime('now') WHERE user_id = ?`)
+      .bind(userId)
+      .run()
+    isPro = false
+  }
+
   const isTrial = isPro && !!sub?.trial_started_at
   const trialDaysRemaining = isTrial && sub?.expires_at
     ? Math.max(0, Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))

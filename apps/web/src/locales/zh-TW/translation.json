@@ -191,7 +191,13 @@
     "expiringBanner": "Pro 試用即將到期！升級以繼續使用所有功能",
     "inProgress": "試用進行中",
     "alreadyUsed": "已使用過免費試用",
-    "cannotSubscribe": "試用期間無法啟動付費訂閱，請等待試用結束後再升級"
+    "cannotSubscribe": "試用期間無法啟動付費訂閱，請等待試用結束後再升級",
+    "confirmTitle": "開始免費試用？",
+    "confirmMessage": "您即將啟動 Pro 7 天免費試用。試用期間可體驗所有 Pro 功能，每個帳號僅限一次。",
+    "confirmStart": "確認開始試用"
+  },
+  "common": {
+    "cancel": "取消"
   },
   "usage": {
     "counter": "今日 {{used}}/{{limit}}",

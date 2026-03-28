@@ -84,7 +84,15 @@ export function PricingPage() {
     }
   }
 
-  const handleStartTrial = async () => {
+  const [showTrialConfirm, setShowTrialConfirm] = useState(false)
+
+  const handleStartTrial = () => {
+    if (!token) return
+    setShowTrialConfirm(true)
+  }
+
+  const handleConfirmTrial = async () => {
+    setShowTrialConfirm(false)
     if (!token) return
     setTrialLoading(true)
     setError(null)
@@ -192,10 +200,10 @@ export function PricingPage() {
               <div className="space-y-2">
                 <button
                   onClick={handleSubscribe}
-                  disabled={loading || isCurrentlyTrial || isCurrentlyPro}
+                  disabled={loading || isCurrentlyPro}
                   className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50"
                 >
-                  {loading ? t('auth.submitLoading') : isCurrentlyPro ? t('pricing.currentPlan') : isCurrentlyTrial ? t('trial.inProgress') : t(`pricing.${key}.cta`)}
+                  {loading ? t('auth.submitLoading') : isCurrentlyPro ? t('pricing.currentPlan') : t(`pricing.${key}.cta`)}
                 </button>
                 {canTrial && (
                   <button
@@ -233,6 +241,30 @@ export function PricingPage() {
       >
         {t('payment.back')}
       </button>
+
+      {/* Trial confirmation dialog */}
+      {showTrialConfirm && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 max-w-sm w-full space-y-4">
+            <h3 className="text-lg font-semibold text-white">{t('trial.confirmTitle')}</h3>
+            <p className="text-gray-300 text-sm">{t('trial.confirmMessage')}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowTrialConfirm(false)}
+                className="flex-1 py-2.5 border border-gray-600 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleConfirmTrial}
+                className="flex-1 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+              >
+                {t('trial.confirmStart')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

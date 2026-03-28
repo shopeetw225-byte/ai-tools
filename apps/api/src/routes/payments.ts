@@ -124,13 +124,13 @@ payments.post('/ecpay/return', async (c) => {
       .first<{ user_id: string }>()
 
     if (order) {
-      // Pro subscription: 30 days from now
+      // Pro subscription: 30 days from now; clear trial_started_at so paid Pro is not treated as trial
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       await c.env.DB
         .prepare(
-          `INSERT INTO subscriptions (user_id, plan, expires_at, updated_at)
-           VALUES (?, 'pro', ?, datetime('now'))
-           ON CONFLICT(user_id) DO UPDATE SET plan = 'pro', expires_at = ?, updated_at = datetime('now')`,
+          `INSERT INTO subscriptions (user_id, plan, expires_at, trial_started_at, updated_at)
+           VALUES (?, 'pro', ?, NULL, datetime('now'))
+           ON CONFLICT(user_id) DO UPDATE SET plan = 'pro', expires_at = ?, trial_started_at = NULL, updated_at = datetime('now')`,
         )
         .bind(order.user_id, expiresAt, expiresAt)
         .run()
@@ -224,16 +224,6 @@ payments.post('/create', async (c) => {
 
   if (!userId) {
     return c.json({ error: 'Unauthorized' }, 401)
-  }
-
-  // Block payment during active trial period
-  const activeSub = await c.env.DB
-    .prepare('SELECT plan, expires_at, trial_started_at FROM subscriptions WHERE user_id = ? LIMIT 1')
-    .bind(userId)
-    .first<{ plan: string; expires_at: string | null; trial_started_at: string | null }>()
-
-  if (activeSub?.plan === 'pro' && activeSub.trial_started_at && activeSub.expires_at && new Date(activeSub.expires_at) >= new Date()) {
-    return c.json({ error: 'trial_active', message: '試用期間無法啟動付費訂閱，請等待試用結束後再升級' }, 409)
   }
 
   const merchantTradeDate = formatMerchantTradeDate(new Date())
