@@ -12,6 +12,7 @@
     "tools": "工具",
     "dashboard": "儀表板",
     "resume": "履歷優化",
+    "grammar": "語法校正",
     "signOut": "登出",
     "language": "語言",
     "localeLabel": "繁體中文",
@@ -217,6 +218,23 @@
     "quota": "今日 {{used}}/{{limit}} 次",
     "minChars": "至少需要 {{min}} 字（目前 {{current}} 字）",
     "maxChars": "超過上限 {{max}} 字，請縮短內容"
+  },
+  "grammar": {
+    "title": "AI 英文語法校正",
+    "subtitle": "貼上英文文字，AI 幫你找出語法錯誤並提供修正建議",
+    "placeholder": "貼上要校正的英文文字（最多 3,000 字元）…\n\nExample:\nShe don't likes the movie because it was too long and the acting were bad.",
+    "check": "開始校正",
+    "checking": "AI 分析中…",
+    "analyzing": "正在分析你的英文文字，檢查語法錯誤…",
+    "result": "校正後文字",
+    "corrections": "發現 {{count}} 處錯誤",
+    "noErrors": "太棒了！沒有發現語法錯誤",
+    "apply": "套用",
+    "applied": "已套用",
+    "applyAll": "全部套用",
+    "emptyHint": "在左側貼上英文文字，AI 將幫你找出語法錯誤",
+    "quota": "今日 {{used}}/{{limit}} 次",
+    "maxChars": "超過上限 {{max}} 字元，請縮短內容"
   },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",

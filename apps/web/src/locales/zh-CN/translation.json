@@ -12,6 +12,7 @@
     "tools": "工具",
     "dashboard": "仪表盘",
     "resume": "简历优化",
+    "grammar": "语法校正",
     "signOut": "退出登录",
     "language": "语言",
     "localeLabel": "简体中文",
@@ -217,6 +218,23 @@
     "quota": "今日 {{used}}/{{limit}} 次",
     "minChars": "至少需要 {{min}} 字（当前 {{current}} 字）",
     "maxChars": "超过上限 {{max}} 字，请缩短内容"
+  },
+  "grammar": {
+    "title": "AI 英文语法校正",
+    "subtitle": "粘贴英文文本，AI 帮你找出语法错误并提供修正建议",
+    "placeholder": "粘贴要校正的英文文本（最多 3,000 字符）…\n\nExample:\nShe don't likes the movie because it was too long and the acting were bad.",
+    "check": "开始校正",
+    "checking": "AI 分析中…",
+    "analyzing": "正在分析你的英文文本，检查语法错误…",
+    "result": "校正后文本",
+    "corrections": "发现 {{count}} 处错误",
+    "noErrors": "太棒了！没有发现语法错误",
+    "apply": "应用",
+    "applied": "已应用",
+    "applyAll": "全部应用",
+    "emptyHint": "在左侧粘贴英文文本，AI 将帮你找出语法错误",
+    "quota": "今日 {{used}}/{{limit}} 次",
+    "maxChars": "超过上限 {{max}} 字符，请缩短内容"
   },
   "errors": {
     "generic": "抱歉，系统发生错误，请稍后再试。",

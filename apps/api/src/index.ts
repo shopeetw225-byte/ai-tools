@@ -72,6 +72,7 @@ import analyticsRoute from './routes/analytics'
 import paymentsRoute from './routes/payments'
 import usageRoute from './routes/usage'
 import resumeRoute from './routes/resume'
+import grammarRoute from './routes/grammar'
 import trialRoute from './routes/trial'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
@@ -106,6 +107,7 @@ app.use('/api/v1/tools/*', rateLimitMiddleware)
 app.use('/api/v1/chat/*', usageQuotaMiddleware)
 app.use('/api/v1/tools/*', async (c, next) => {
   if (c.req.path.startsWith('/api/v1/tools/resume-optimize')) return next()
+  if (c.req.path.startsWith('/api/v1/tools/grammar-check')) return next()
   return usageQuotaMiddleware(c, next)
 })
 
@@ -120,6 +122,7 @@ app.get('/api/v1/models', async (c) => {
   return c.json({ models })
 })
 app.route('/api/v1/tools/resume-optimize', resumeRoute)
+app.route('/api/v1/tools/grammar-check', grammarRoute)
 app.route('/api/v1/tools', toolsRoute)
 app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)
