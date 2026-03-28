@@ -4,10 +4,26 @@
     "tagline": "基於 Cloudflare"
   },
   "nav": {
-    "chat": "對話",
+    "home": "首頁",
     "tools": "工具",
+    "pricing": "定價",
+    "chat": "對話",
     "dashboard": "數據",
+    "login": "登入",
     "signOut": "登出"
+  },
+  "buttons": {
+    "start": "開始",
+    "cancel": "取消",
+    "save": "儲存",
+    "continue": "繼續",
+    "pay": "付款"
+  },
+  "pages": {
+    "home": "首頁",
+    "toolsList": "工具列表",
+    "chat": "聊天",
+    "settings": "設定"
   },
   "loading": {
     "general": "載入中…",
@@ -106,6 +122,14 @@
     "title": "付款",
     "creditCard": "信用卡付款",
     "atm": "ATM 轉帳",
+    "atmInstructions": {
+      "title": "ATM 轉帳說明",
+      "bank": "銀行代碼",
+      "account": "轉帳帳號",
+      "amount": "轉帳金額",
+      "deadline": "付款期限",
+      "note": "請在期限內完成轉帳，逾期訂單將自動取消"
+    },
     "cvs": "超商代碼",
     "success": {
       "title": "付款成功",
@@ -135,6 +159,8 @@
     "networkError": "網路連線錯誤，請稍後再試",
     "serverError": "伺服器發生錯誤，請稍後再試",
     "authRequired": "請先登入",
+    "authFailed": "認證失敗，請重新登入",
+    "paymentFailed": "付款失敗，請重試或選擇其他付款方式",
     "unknownError": "發生未知錯誤",
     "inputRequired": "請填寫此欄位"
   }

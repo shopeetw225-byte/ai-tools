@@ -4,10 +4,26 @@
     "tagline": "基于 Cloudflare"
   },
   "nav": {
-    "chat": "对话",
+    "home": "首页",
     "tools": "工具",
+    "pricing": "定价",
+    "chat": "对话",
     "dashboard": "数据",
+    "login": "登录",
     "signOut": "退出登录"
+  },
+  "buttons": {
+    "start": "开始",
+    "cancel": "取消",
+    "save": "保存",
+    "continue": "继续",
+    "pay": "付款"
+  },
+  "pages": {
+    "home": "首页",
+    "toolsList": "工具列表",
+    "chat": "聊天",
+    "settings": "设置"
   },
   "loading": {
     "general": "加载中…",
@@ -106,6 +122,14 @@
     "title": "付款",
     "creditCard": "信用卡付款",
     "atm": "ATM 转账",
+    "atmInstructions": {
+      "title": "ATM 转账说明",
+      "bank": "银行代码",
+      "account": "转账账号",
+      "amount": "转账金额",
+      "deadline": "付款期限",
+      "note": "请在期限内完成转账，逾期订单将自动取消"
+    },
     "cvs": "便利店代码",
     "success": {
       "title": "付款成功",
@@ -135,6 +159,8 @@
     "networkError": "网络连接错误，请稍后再试",
     "serverError": "服务器发生错误，请稍后再试",
     "authRequired": "请先登录",
+    "authFailed": "认证失败，请重新登录",
+    "paymentFailed": "付款失败，请重试或选择其他付款方式",
     "unknownError": "发生未知错误",
     "inputRequired": "请填写此字段"
   }
