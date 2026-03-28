@@ -31,45 +31,55 @@ auth.post('/register', async (c) => {
     return c.json({ error: 'invalid email format' }, 400)
   }
 
-  // Check if email is taken
-  const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?')
-    .bind(email)
-    .first<{ id: string }>()
-  if (existing) {
-    return c.json({ error: 'email already registered' }, 409)
+  try {
+    // Check if email is taken
+    const existing = await c.env.DB.prepare('SELECT id FROM users WHERE email = ?')
+      .bind(email)
+      .first<{ id: string }>()
+    if (existing) {
+      return c.json({ error: 'email already registered' }, 409)
+    }
+
+    const passwordHash = await hashPassword(password)
+
+    const user = await c.env.DB.prepare(
+      `INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?) RETURNING id, email, name, created_at`,
+    )
+      .bind(email, name ?? null, passwordHash)
+      .first<{ id: string; email: string; name: string | null; created_at: string }>()
+
+    if (!user) {
+      return c.json({ error: 'failed to create user' }, 500)
+    }
+
+    const token = generateToken()
+    const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString()
+
+    await c.env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`,
+    )
+      .bind(token, user.id, expiresAt)
+      .run()
+
+    await c.env.KV.put(
+      `session:${token}`,
+      JSON.stringify({ userId: user.id, email: user.email }),
+      { expirationTtl: SESSION_TTL_SECONDS },
+    )
+
+    return c.json(
+      { token, user: { id: user.id, email: user.email, name: user.name } },
+      201,
+    )
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    if (message.includes('no such table')) {
+      console.error('[register] D1 table missing — run migrations:', message)
+      return c.json({ error: 'service unavailable: database not initialized' }, 503)
+    }
+    console.error('[register] unexpected error:', message)
+    return c.json({ error: 'internal server error' }, 500)
   }
-
-  const passwordHash = await hashPassword(password)
-
-  const user = await c.env.DB.prepare(
-    `INSERT INTO users (email, name, password_hash) VALUES (?, ?, ?) RETURNING id, email, name, created_at`,
-  )
-    .bind(email, name ?? null, passwordHash)
-    .first<{ id: string; email: string; name: string | null; created_at: string }>()
-
-  if (!user) {
-    return c.json({ error: 'failed to create user' }, 500)
-  }
-
-  const token = generateToken()
-  const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString()
-
-  await c.env.DB.prepare(
-    `INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`,
-  )
-    .bind(token, user.id, expiresAt)
-    .run()
-
-  await c.env.KV.put(
-    `session:${token}`,
-    JSON.stringify({ userId: user.id, email: user.email }),
-    { expirationTtl: SESSION_TTL_SECONDS },
-  )
-
-  return c.json(
-    { token, user: { id: user.id, email: user.email, name: user.name } },
-    201,
-  )
 })
 
 // POST /api/v1/auth/login
@@ -83,37 +93,47 @@ auth.post('/login', async (c) => {
     return c.json({ error: 'email and password are required' }, 400)
   }
 
-  const user = await c.env.DB.prepare(
-    `SELECT id, email, name, password_hash FROM users WHERE email = ?`,
-  )
-    .bind(email)
-    .first<{ id: string; email: string; name: string | null; password_hash: string | null }>()
+  try {
+    const user = await c.env.DB.prepare(
+      `SELECT id, email, name, password_hash FROM users WHERE email = ?`,
+    )
+      .bind(email)
+      .first<{ id: string; email: string; name: string | null; password_hash: string | null }>()
 
-  if (!user || !user.password_hash) {
-    return c.json({ error: 'invalid email or password' }, 401)
+    if (!user || !user.password_hash) {
+      return c.json({ error: 'invalid email or password' }, 401)
+    }
+
+    const valid = await verifyPassword(password, user.password_hash)
+    if (!valid) {
+      return c.json({ error: 'invalid email or password' }, 401)
+    }
+
+    const token = generateToken()
+    const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString()
+
+    await c.env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`,
+    )
+      .bind(token, user.id, expiresAt)
+      .run()
+
+    await c.env.KV.put(
+      `session:${token}`,
+      JSON.stringify({ userId: user.id, email: user.email }),
+      { expirationTtl: SESSION_TTL_SECONDS },
+    )
+
+    return c.json({ token, user: { id: user.id, email: user.email, name: user.name } })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'unknown error'
+    if (message.includes('no such table')) {
+      console.error('[login] D1 table missing — run migrations:', message)
+      return c.json({ error: 'service unavailable: database not initialized' }, 503)
+    }
+    console.error('[login] unexpected error:', message)
+    return c.json({ error: 'internal server error' }, 500)
   }
-
-  const valid = await verifyPassword(password, user.password_hash)
-  if (!valid) {
-    return c.json({ error: 'invalid email or password' }, 401)
-  }
-
-  const token = generateToken()
-  const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString()
-
-  await c.env.DB.prepare(
-    `INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)`,
-  )
-    .bind(token, user.id, expiresAt)
-    .run()
-
-  await c.env.KV.put(
-    `session:${token}`,
-    JSON.stringify({ userId: user.id, email: user.email }),
-    { expirationTtl: SESSION_TTL_SECONDS },
-  )
-
-  return c.json({ token, user: { id: user.id, email: user.email, name: user.name } })
 })
 
 // POST /api/v1/auth/logout
