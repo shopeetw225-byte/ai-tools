@@ -8,6 +8,7 @@ import { DashboardPanel } from './components/DashboardPanel'
 import { PaymentCheckoutPage } from './components/PaymentCheckoutPage'
 import { PaymentResultPage } from './components/PaymentResultPage'
 import { PricingPage } from './components/PricingPage'
+import { PrivacyPage } from './components/PrivacyPage'
 import { OnboardingModal } from './components/OnboardingModal'
 import { UsageProgress } from './components/UsageProgress'
 import { EngagementUpsell } from './components/EngagementUpsell'
@@ -60,6 +61,11 @@ function AppShell() {
   }
 
   if (!isAuthenticated) {
+    // Privacy page is public — accessible without login
+    const currentPath = location.pathname
+    if (currentPath.endsWith('/privacy')) {
+      return <PrivacyPage />
+    }
     return <AuthPage />
   }
 
@@ -141,9 +147,19 @@ function AppShell() {
           <Route path="pricing" element={<PricingPage />} />
           <Route path="payment/checkout" element={<PaymentCheckoutPage />} />
           <Route path="payment/result" element={<PaymentResultPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
           <Route path="*" element={<Navigate to="chat" replace />} />
         </Routes>
       </main>
+
+      <footer className="border-t border-gray-800 px-6 py-3 text-center">
+        <p className="text-xs text-gray-500">
+          &copy; 2026 貓魚印象有限公司 &middot;{' '}
+          <Link to={`/${currentLanguage}/privacy`} className="text-gray-400 hover:text-gray-200 transition-colors">
+            {t('nav.privacy')}
+          </Link>
+        </p>
+      </footer>
 
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />

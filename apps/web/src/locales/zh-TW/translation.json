@@ -13,7 +13,9 @@
     "dashboard": "儀表板",
     "signOut": "登出",
     "language": "語言",
-    "localeLabel": "繁體中文"
+    "localeLabel": "繁體中文",
+    "privacy": "隱私政策",
+    "backToApp": "返回應用"
   },
   "auth": {
     "login": "登入",
