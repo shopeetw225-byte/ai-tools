@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import type { Env } from '../index'
+import { workersAIGatewayOptions } from '../lib/ai-gateway'
 
 type ToolName = 'summarize' | 'translate' | 'explain-code'
 
@@ -33,7 +34,7 @@ tools.post('/:name', async (c) => {
   let toolRunId: string | undefined
   try {
     const result = await c.env.DB.prepare(
-      `INSERT INTO tool_runs (user_id, tool_name, input, status) VALUES ('anonymous', ?, ?, 'running') RETURNING id`
+      `INSERT INTO tool_runs (user_id, tool_name, input, status) VALUES ('anonymous', ?, ?, 'running') RETURNING id`,
     )
       .bind(name, body.input.slice(0, 1000))
       .first<{ id: string }>()
@@ -43,22 +44,23 @@ tools.post('/:name', async (c) => {
   }
 
   try {
-    const response = await c.env.AI.run(
-      '@cf/meta/llama-3.1-8b-instruct' as Parameters<Ai['run']>[0],
+    // Route through AI Gateway when configured for observability
+    const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
+
+    const response = await (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+      '@cf/meta/llama-3.1-8b-instruct',
       {
-        messages: [
-          { role: 'user', content: prompt },
-        ],
-      } as never
+        messages: [{ role: 'user', content: prompt }],
+      },
+      gatewayOptions,
     ) as { response: string }
 
     const output = response.response ?? ''
 
-    // Update tool run record
     try {
       if (toolRunId) {
         await c.env.DB.prepare(
-          `UPDATE tool_runs SET output = ?, status = 'done', completed_at = datetime('now') WHERE id = ?`
+          `UPDATE tool_runs SET output = ?, status = 'done', completed_at = datetime('now') WHERE id = ?`,
         )
           .bind(output.slice(0, 5000), toolRunId)
           .run()
@@ -72,7 +74,7 @@ tools.post('/:name', async (c) => {
     try {
       if (toolRunId) {
         await c.env.DB.prepare(
-          `UPDATE tool_runs SET status = 'error', error = ?, completed_at = datetime('now') WHERE id = ?`
+          `UPDATE tool_runs SET status = 'error', error = ?, completed_at = datetime('now') WHERE id = ?`,
         )
           .bind(String(err), toolRunId)
           .run()

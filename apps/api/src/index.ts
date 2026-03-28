@@ -10,6 +10,7 @@ export type Env = {
   AI: Ai
   ENVIRONMENT: string
   AI_GATEWAY_URL?: string
+  ANTHROPIC_API_KEY?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -30,6 +31,11 @@ app.get('/health', (c) => c.json({ ok: true, env: c.env.ENVIRONMENT }))
 import chatRoute from './routes/chat'
 import toolsRoute from './routes/tools'
 import conversationsRoute from './routes/conversations'
+import { rateLimitMiddleware } from './middleware/rate-limit'
+
+// Rate limiting applied to AI inference routes
+app.use('/api/v1/chat/*', rateLimitMiddleware)
+app.use('/api/v1/tools/*', rateLimitMiddleware)
 
 app.route('/api/v1/chat', chatRoute)
 app.route('/api/v1/tools', toolsRoute)
