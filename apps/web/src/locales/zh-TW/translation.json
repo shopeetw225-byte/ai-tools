@@ -103,6 +103,32 @@
     "cached": "已快取，每 5 分鐘更新",
     "errorSuffix": "% 錯誤"
   },
+  "payment": {
+    "back": "返回",
+    "checkout": {
+      "preparing": "正在準備付款，請稍候…",
+      "redirecting": "即將跳轉至綠界付款頁面…",
+      "doNotClose": "請勿關閉此視窗",
+      "missingParams": "缺少付款資訊，請返回重試。",
+      "notLoggedIn": "請先登入後再進行付款。",
+      "createFailed": "建立訂單失敗，請稍後再試。"
+    },
+    "result": {
+      "pending": {
+        "title": "付款處理中",
+        "subtitle": "正在等待付款確認，請稍候…"
+      },
+      "success": {
+        "title": "付款成功",
+        "subtitle": "您的訂單已完成付款，感謝您的購買！"
+      },
+      "failed": {
+        "title": "付款失敗",
+        "subtitle": "付款未能完成，請重試或選擇其他付款方式。"
+      },
+      "goToDashboard": "返回儀表板"
+    }
+  },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",
     "auth": {

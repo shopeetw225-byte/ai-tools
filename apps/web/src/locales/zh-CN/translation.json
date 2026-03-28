@@ -103,6 +103,32 @@
     "cached": "已缓存，每 5 分钟更新",
     "errorSuffix": "% 错误"
   },
+  "payment": {
+    "back": "返回",
+    "checkout": {
+      "preparing": "正在准备付款，请稍候…",
+      "redirecting": "即将跳转至绿界付款页面…",
+      "doNotClose": "请勿关闭此窗口",
+      "missingParams": "缺少付款信息，请返回重试。",
+      "notLoggedIn": "请先登录后再进行付款。",
+      "createFailed": "创建订单失败，请稍后再试。"
+    },
+    "result": {
+      "pending": {
+        "title": "付款处理中",
+        "subtitle": "正在等待付款确认，请稍候…"
+      },
+      "success": {
+        "title": "付款成功",
+        "subtitle": "您的订单已完成付款，感谢您的购买！"
+      },
+      "failed": {
+        "title": "付款失败",
+        "subtitle": "付款未能完成，请重试或选择其他付款方式。"
+      },
+      "goToDashboard": "返回仪表盘"
+    }
+  },
   "errors": {
     "generic": "抱歉，系统发生错误，请稍后再试。",
     "auth": {

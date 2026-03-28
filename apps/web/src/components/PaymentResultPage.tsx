@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useSearchParams } from 'react-router-dom'
-import { useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { isSupportedLanguage, getDefaultLanguage } from '../lib/i18n-routing'
 
 type OrderStatus = 'pending' | 'paid' | 'failed' | 'error' | 'success'
