@@ -71,6 +71,7 @@ import authRoute from './routes/auth'
 import analyticsRoute from './routes/analytics'
 import paymentsRoute from './routes/payments'
 import usageRoute from './routes/usage'
+import resumeRoute from './routes/resume'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
 import { usageQuotaMiddleware } from './middleware/usage-quota'
@@ -112,6 +113,7 @@ app.get('/api/v1/models', async (c) => {
   ]
   return c.json({ models })
 })
+app.route('/api/v1/tools/resume-optimize', resumeRoute)
 app.route('/api/v1/tools', toolsRoute)
 app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)

@@ -11,6 +11,7 @@
     "chat": "聊天",
     "tools": "工具",
     "dashboard": "儀表板",
+    "resume": "履歷優化",
     "signOut": "登出",
     "language": "語言",
     "localeLabel": "繁體中文",
@@ -191,6 +192,21 @@
     "description": "你已經是 AI Tools 的忠實用戶了！升級 Pro 享受無限使用，不再受每日額度限制。",
     "cta": "升級 Pro — NT$99/月",
     "dismiss": "繼續免費使用"
+  },
+  "resume": {
+    "title": "AI 履歷優化",
+    "subtitle": "貼上履歷，AI 幫你強化關鍵字、量化成就、優化句式",
+    "placeholder": "貼上你的履歷內容（50–5,000 字）…\n\n例如：\n工作經驗：\n- 負責公司產品的前端開發\n- 參與多個專案的設計與實作\n- 與後端工程師合作完成 API 串接",
+    "targetPositionPlaceholder": "目標職位（選填，例如：軟體工程師）",
+    "optimize": "開始優化",
+    "optimizing": "AI 分析中…",
+    "analyzing": "正在分析你的履歷，優化關鍵字與句式…",
+    "result": "優化結果",
+    "suggestions": "改善建議",
+    "emptyHint": "在左側貼上履歷內容，AI 將幫你優化為專業版本",
+    "quota": "今日 {{used}}/{{limit}} 次",
+    "minChars": "至少需要 {{min}} 字（目前 {{current}} 字）",
+    "maxChars": "超過上限 {{max}} 字，請縮短內容"
   },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",

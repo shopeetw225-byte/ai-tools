@@ -11,6 +11,7 @@
     "chat": "聊天",
     "tools": "工具",
     "dashboard": "仪表盘",
+    "resume": "简历优化",
     "signOut": "退出登录",
     "language": "语言",
     "localeLabel": "简体中文",
@@ -191,6 +192,21 @@
     "description": "你已经是 AI Tools 的忠实用户了！升级 Pro 享受无限使用，不再受每日额度限制。",
     "cta": "升级 Pro — NT$99/月",
     "dismiss": "继续免费使用"
+  },
+  "resume": {
+    "title": "AI 简历优化",
+    "subtitle": "粘贴简历，AI 帮你强化关键词、量化成就、优化句式",
+    "placeholder": "粘贴你的简历内容（50–5,000 字）…\n\n例如：\n工作经验：\n- 负责公司产品的前端开发\n- 参与多个项目的设计与实现\n- 与后端工程师合作完成 API 对接",
+    "targetPositionPlaceholder": "目标职位（可选，例如：软件工程师）",
+    "optimize": "开始优化",
+    "optimizing": "AI 分析中…",
+    "analyzing": "正在分析你的简历，优化关键词与句式…",
+    "result": "优化结果",
+    "suggestions": "改善建议",
+    "emptyHint": "在左侧粘贴简历内容，AI 将帮你优化为专业版本",
+    "quota": "今日 {{used}}/{{limit}} 次",
+    "minChars": "至少需要 {{min}} 字（当前 {{current}} 字）",
+    "maxChars": "超过上限 {{max}} 字，请缩短内容"
   },
   "errors": {
     "generic": "抱歉，系统发生错误，请稍后再试。",

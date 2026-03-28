@@ -12,6 +12,7 @@ import { PrivacyPage } from './components/PrivacyPage'
 import { OnboardingModal } from './components/OnboardingModal'
 import { UsageProgress } from './components/UsageProgress'
 import { EngagementUpsell } from './components/EngagementUpsell'
+import { ResumeOptimizer } from './components/ResumeOptimizer'
 import { useAuth } from './hooks/useAuth'
 import { useUsage } from './hooks/useUsage'
 import { useStreak } from './hooks/useStreak'
@@ -75,6 +76,7 @@ function AppShell() {
 
   const navItems = [
     { to: `/${currentLanguage}/chat`, label: t('nav.chat') },
+    { to: `/${currentLanguage}/resume`, label: t('nav.resume') },
     { to: `/${currentLanguage}/tools`, label: t('nav.tools') },
     { to: `/${currentLanguage}/dashboard`, label: t('nav.dashboard') },
   ]
@@ -145,6 +147,7 @@ function AppShell() {
         <Routes>
           <Route index element={<Navigate to="chat" replace />} />
           <Route path="chat" element={<ChatPanel />} />
+          <Route path="resume" element={<ResumeOptimizer />} />
           <Route path="tools" element={<ToolPanel />} />
           <Route path="dashboard" element={<DashboardPanel />} />
           <Route path="pricing" element={<PricingPage />} />
