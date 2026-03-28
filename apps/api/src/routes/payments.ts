@@ -117,7 +117,7 @@ payments.post('/ecpay/return', async (c) => {
     .run()
 
   // If payment succeeded, upsert subscription to pro
-  if (rtnCode === 1 && updateResult.meta.changes > 0) {
+  if (rtnCode === 1 && (updateResult.meta?.changes ?? 0) > 0) {
     const order = await c.env.DB
       .prepare('SELECT user_id FROM orders WHERE merchant_trade_no = ? LIMIT 1')
       .bind(merchantTradeNo)

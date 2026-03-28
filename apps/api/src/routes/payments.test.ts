@@ -132,7 +132,7 @@ function createWebhookDbMock(opts?: { existingNotification?: boolean }) {
     firstFn.mockResolvedValue(null)
   }
 
-  const run = vi.fn().mockResolvedValue({ success: true })
+  const run = vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } })
 
   const bind = vi.fn(() => ({
     first: firstFn,
@@ -196,8 +196,8 @@ describe('POST /ecpay/return webhook', () => {
 
     expect(res.status).toBe(200)
     expect(await res.text()).toBe('1|OK')
-    // Should have called prepare 3 times: check existing, insert notification, update order
-    expect(spies.prepare).toHaveBeenCalledTimes(3)
+    // prepare calls: check existing, insert notification, update order, select user_id for subscription
+    expect(spies.prepare).toHaveBeenCalledTimes(4)
   })
 
   it('rejects invalid CheckMacValue', async () => {
