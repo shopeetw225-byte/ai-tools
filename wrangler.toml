@@ -6,8 +6,9 @@
 # After running provisioning commands, copy the generated IDs here and
 # into apps/api/wrangler.toml bindings.
 
-# D1 database_id   = "<output of: wrangler d1 create ai-tools-db>"
-# KV namespace_id  = "<output of: wrangler kv namespace create AI_TOOLS_KV>"
-# KV preview_id    = "<output of: wrangler kv namespace create AI_TOOLS_KV --preview>"
+# D1 database_id   = "fa02ea94-817c-4aeb-873a-ede18e43b11e"
+# KV namespace_id  = "189e3b4e550c4dc8b7c7c68c719b9825"
+# KV preview_id    = "189e3b4e550c4dc8b7c7c68c719b9825"
 # R2 bucket_name   = "ai-tools-assets"
 # AI Gateway ID    = "ai-tools-gateway"  (created via dashboard)
+# Account ID       = "a1540e7bbaec0f1785a7f339ef92f1a1"

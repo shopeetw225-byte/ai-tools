@@ -6,7 +6,7 @@ import { secureHeaders } from 'hono/secure-headers'
 export type Env = {
   DB: D1Database
   KV: KVNamespace
-  ASSETS: R2Bucket
+  ASSETS?: R2Bucket
   AI: Ai
   ENVIRONMENT: string
   AI_GATEWAY_URL?: string
