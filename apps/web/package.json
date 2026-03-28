@@ -2,11 +2,12 @@
   "name": "@ai-tools/web",
   "private": true,
   "version": "0.0.1",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit",
+    "lint": "tsc -b",
     "deploy": "pnpm build && wrangler pages deploy dist --project-name=ai-tools"
   },
   "dependencies": {
