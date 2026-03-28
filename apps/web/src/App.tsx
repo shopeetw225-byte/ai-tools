@@ -81,64 +81,67 @@ function AppShell() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <header className="border-b border-gray-800 px-6 py-3 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Link
-            to={`/${currentLanguage}/chat`}
-            className="text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent"
-          >
-            {t('app.name')}
-          </Link>
-          <span className="text-xs text-gray-600 font-mono">{t('app.tagline')}</span>
-        </div>
-
-        <nav className="flex gap-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-gray-800 text-white'
-                    : 'text-gray-400 hover:text-gray-200'
-                }`
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">{t('nav.language')}</span>
-            {supportedLanguages.map((language) => (
-              <button
-                key={language}
-                onClick={() => changeLanguage(language)}
-                className={`text-xs px-2 py-1 rounded border transition-colors ${
-                  language === currentLanguage
-                    ? 'border-blue-500 text-blue-300'
-                    : 'border-gray-700 text-gray-400 hover:text-gray-200'
-                }`}
+      <header className="border-b border-gray-800 px-4 py-3 sm:px-6">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link
+                to={`/${currentLanguage}/chat`}
+                className="text-lg font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent"
               >
-                {language}
+                {t('app.name')}
+              </Link>
+              <span className="hidden text-xs text-gray-600 font-mono sm:inline">{t('app.tagline')}</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+              <div className="flex items-center gap-1">
+                {supportedLanguages.map((language) => (
+                  <button
+                    key={language}
+                    onClick={() => changeLanguage(language)}
+                    className={`text-xs px-2 py-1 rounded border transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center sm:min-h-0 sm:min-w-0 ${
+                      language === currentLanguage
+                        ? 'border-blue-500 text-blue-300'
+                        : 'border-gray-700 text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    {language}
+                  </button>
+                ))}
+              </div>
+              <span className="hidden text-xs text-gray-500 sm:inline">{user?.email}</span>
+              <button
+                onClick={logout}
+                className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-600 min-h-[44px] sm:min-h-0"
+              >
+                {t('nav.signOut')}
               </button>
-            ))}
+            </div>
           </div>
           <UsageProgress used={used} limit={limit} isPro={isPro} />
-          <span className="text-xs text-gray-500">{user?.email}</span>
-          <button
-            onClick={logout}
-            className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-600"
-          >
-            {t('nav.signOut')}
-          </button>
+
+          <nav className="flex flex-wrap gap-1" role="navigation">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `px-4 py-1.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] flex items-center sm:min-h-0 ${
+                    isActive
+                      ? 'bg-gray-800 text-white'
+                      : 'text-gray-400 hover:text-gray-200'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
         </div>
       </header>
 
-      <main className="flex-1 max-w-3xl w-full mx-auto flex flex-col" style={{ height: 'calc(100vh - 57px)' }}>
+      <main className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-0 sm:px-4">
         <Routes>
           <Route index element={<Navigate to="chat" replace />} />
           <Route path="chat" element={<ChatPanel />} />

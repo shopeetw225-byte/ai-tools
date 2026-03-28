@@ -62,7 +62,7 @@ export function ChatMessageBubble({ message }: Props) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-blue-600 px-4 py-2.5 text-sm leading-relaxed text-white">
+        <div className="max-w-[88%] break-words rounded-2xl rounded-br-sm bg-blue-600 px-4 py-2.5 text-sm leading-relaxed text-white sm:max-w-[80%]">
           {message.content}
         </div>
       </div>
@@ -73,7 +73,7 @@ export function ChatMessageBubble({ message }: Props) {
     <div className="flex justify-start">
       <div
         data-state={message.state}
-        className={`max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed ${assistantBubbleClassName}`}
+        className={`max-w-[88%] break-words rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed sm:max-w-[80%] ${assistantBubbleClassName}`}
       >
         {message.content ? (
           <SimpleMarkdown content={message.content} />

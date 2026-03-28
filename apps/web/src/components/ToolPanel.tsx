@@ -193,12 +193,12 @@ export function ToolPanel() {
       </div>
 
       {/* Tool Tabs */}
-      <div className="flex gap-1 px-4 py-2 border-b border-gray-800">
+      <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-gray-800 sm:px-4">
         {TOOLS.map((tool) => (
           <button
             key={tool.id}
             onClick={() => handleToolChange(tool)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] sm:min-h-0 ${
               activeTool.id === tool.id
                 ? 'bg-gray-700 text-white'
                 : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
@@ -211,18 +211,18 @@ export function ToolPanel() {
       </div>
 
       {/* Tool Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 sm:px-4">
         <ToolsHintBanner />
         <p className="text-xs text-gray-500">{toolLabels[activeTool.id].description}</p>
 
         {/* Tool-specific options */}
         {activeTool.id === 'summarize' && (
-          <div className="flex gap-1.5">
+          <div className="flex flex-wrap gap-1.5">
             {summaryLengths.map((len) => (
               <button
                 key={len.value}
                 onClick={() => setSummaryLength(len.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] sm:min-h-0 ${
                   summaryLength === len.value
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-800 text-gray-400 hover:text-gray-200'
@@ -235,11 +235,11 @@ export function ToolPanel() {
         )}
 
         {activeTool.id === 'translate' && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <select
               value={sourceLanguage}
               onChange={(e) => setSourceLanguage(e.target.value)}
-              className="flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
+              className="min-h-[44px] flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700 sm:min-h-0"
             >
               {sourceLanguages.map((lang) => (
                 <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -248,7 +248,7 @@ export function ToolPanel() {
             <button
               onClick={handleSwapLanguages}
               disabled={sourceLanguage === 'auto'}
-              className="px-2 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="min-h-[44px] min-w-[44px] self-center px-2 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed sm:min-h-0 sm:min-w-0"
               title={t('tools.translate.swap')}
             >
               ⇄
@@ -256,7 +256,7 @@ export function ToolPanel() {
             <select
               value={targetLanguage}
               onChange={(e) => setTargetLanguage(e.target.value)}
-              className="flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
+              className="min-h-[44px] flex-1 bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700 sm:min-h-0"
             >
               {TARGET_LANGUAGES.map((lang) => (
                 <option key={lang} value={lang}>{lang}</option>
@@ -269,7 +269,7 @@ export function ToolPanel() {
           <select
             value={codeLanguage}
             onChange={(e) => setCodeLanguage(e.target.value)}
-            className="w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700"
+            className="min-h-[44px] w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 border border-gray-700 sm:min-h-0"
           >
             {codeLanguages.map((lang) => (
               <option key={lang.value} value={lang.value}>{lang.label}</option>
@@ -309,7 +309,7 @@ export function ToolPanel() {
         <button
           onClick={handleRun}
           disabled={!input.trim() || loading || isOverLimit}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+          className="min-h-[44px] w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl px-4 py-2.5 text-sm font-medium transition-colors sm:min-h-0"
         >
           {loading ? t('tools.running') : t('tools.run', { name: toolLabels[activeTool.id].name })}
         </button>

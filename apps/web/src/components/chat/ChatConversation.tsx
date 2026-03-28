@@ -49,7 +49,7 @@ export function ChatConversation({ messages, onSuggestionClick, onRetry }: Props
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center text-center space-y-3 px-4 py-4">
+      <div className="flex flex-1 flex-col items-center justify-center space-y-3 px-4 py-6 text-center sm:px-6">
         <div className="text-4xl">💬</div>
         <p className="text-gray-400 text-sm">Start a conversation with AI</p>
         <div className="flex flex-wrap gap-2 justify-center mt-2">
@@ -72,7 +72,7 @@ export function ChatConversation({ messages, onSuggestionClick, onRetry }: Props
       ref={scrollRegionRef}
       data-testid="chat-scroll-region"
       onScroll={handleScroll}
-      className="relative flex-1 overflow-y-auto px-4 py-4"
+      className="relative flex-1 overflow-y-auto px-3 py-4 sm:px-5"
     >
       <ChatMessageList messages={messages} onRetry={onRetry} />
       {!isPinnedToBottom && (
