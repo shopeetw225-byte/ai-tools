@@ -5,6 +5,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://ai-tools-15z.pages.dev"
 # Set AI_GATEWAY_URL via dashboard or:
 #   wrangler secret put AI_GATEWAY_URL
 # Format: https://gateway.ai.cloudflare.com/v1/{account-id}/ai-tools-gateway
