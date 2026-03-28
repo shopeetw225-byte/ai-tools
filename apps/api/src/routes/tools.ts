@@ -113,14 +113,16 @@ tools.post('/:name', async (c) => {
     const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
 
     const response = await executeWithRetry(
-      async (signal) =>
-        (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+      async (signal) => {
+        const opts = gatewayOptions ? { ...gatewayOptions, signal } : { signal }
+        return (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
           '@cf/meta/llama-3.1-8b-instruct',
           {
             messages: [{ role: 'user', content: prompt }],
           },
-          { ...gatewayOptions, signal },
-        ),
+          opts,
+        )
+      },
       {
         timeoutMs: AI_REQUEST_TIMEOUT_MS,
         maxAttempts: AI_MAX_ATTEMPTS,

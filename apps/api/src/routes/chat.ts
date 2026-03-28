@@ -198,15 +198,25 @@ chat.post('/', async (c) => {
             )
           }
         } else {
-          // Workers AI — route through AI Gateway when URL is configured
+          // Workers AI — route through AI Gateway when URL is configured, direct otherwise
           const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
           const aiStream = await executeWithRetry(
-            async (signal) =>
-              (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+            async (signal) => {
+              // When no gateway URL, call AI.run with minimal options to avoid
+              // potential issues with gateway configuration
+              if (gatewayOptions) {
+                return (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+                  WORKERS_AI_MODEL,
+                  { messages, stream: true },
+                  { ...gatewayOptions, signal },
+                )
+              }
+              return (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
                 WORKERS_AI_MODEL,
                 { messages, stream: true },
-                { ...gatewayOptions, signal },
-              ),
+                { signal },
+              )
+            },
             {
               timeoutMs: AI_REQUEST_TIMEOUT_MS,
               maxAttempts: AI_MAX_ATTEMPTS,
