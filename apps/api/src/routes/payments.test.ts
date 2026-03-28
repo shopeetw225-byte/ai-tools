@@ -277,7 +277,7 @@ describe('POST /ecpay/return webhook', () => {
 })
 
 describe('POST /ecpay/result (browser redirect)', () => {
-  it('redirects to success page for paid order', async () => {
+  it('redirects to success page for paid order with valid signature', async () => {
     const firstFn = vi.fn().mockResolvedValue({ id: 'order-1', status: 'paid' })
     const bind = vi.fn(() => ({ first: firstFn, run: vi.fn() }))
     const prepare = vi.fn(() => ({ bind }))
@@ -288,6 +288,82 @@ describe('POST /ecpay/result (browser redirect)', () => {
       KV: {} as KVNamespace,
       AI: {} as Ai,
       ENVIRONMENT: 'test',
+      ECPAY_HASH_KEY: HASH_KEY,
+      ECPAY_HASH_IV: HASH_IV,
+    } satisfies Env
+    const app = createWebhookApp(env)
+
+    const body = await buildWebhookBody({
+      MerchantTradeNo: 'DX202603281200000001',
+      RtnCode: 1,
+      RtnMsg: 'Succeeded',
+      TradeNo: '2403281234567',
+    })
+
+    const res = await app.request(
+      new Request('http://localhost/ecpay/result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        redirect: 'manual',
+      }),
+      {},
+      env,
+    )
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toContain('status=success')
+  })
+
+  it('redirects to error page for unknown order with valid signature', async () => {
+    const firstFn = vi.fn().mockResolvedValue(null)
+    const bind = vi.fn(() => ({ first: firstFn, run: vi.fn() }))
+    const prepare = vi.fn(() => ({ bind }))
+    const db = { prepare } as unknown as D1Database
+
+    const env = {
+      DB: db,
+      KV: {} as KVNamespace,
+      AI: {} as Ai,
+      ENVIRONMENT: 'test',
+      ECPAY_HASH_KEY: HASH_KEY,
+      ECPAY_HASH_IV: HASH_IV,
+    } satisfies Env
+    const app = createWebhookApp(env)
+
+    const body = await buildWebhookBody({
+      MerchantTradeNo: 'NONEXISTENT',
+      RtnCode: 1,
+    })
+
+    const res = await app.request(
+      new Request('http://localhost/ecpay/result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        redirect: 'manual',
+      }),
+      {},
+      env,
+    )
+
+    expect(res.status).toBe(302)
+    expect(res.headers.get('location')).toContain('status=error')
+  })
+
+  it('redirects to error page when CheckMacValue is missing', async () => {
+    const firstFn = vi.fn().mockResolvedValue({ id: 'order-1', status: 'paid' })
+    const bind = vi.fn(() => ({ first: firstFn, run: vi.fn() }))
+    const prepare = vi.fn(() => ({ bind }))
+    const db = { prepare } as unknown as D1Database
+
+    const env = {
+      DB: db,
+      KV: {} as KVNamespace,
+      AI: {} as Ai,
+      ENVIRONMENT: 'test',
+      ECPAY_HASH_KEY: HASH_KEY,
+      ECPAY_HASH_IV: HASH_IV,
     } satisfies Env
     const app = createWebhookApp(env)
 
@@ -307,11 +383,13 @@ describe('POST /ecpay/result (browser redirect)', () => {
     )
 
     expect(res.status).toBe(302)
-    expect(res.headers.get('location')).toContain('status=success')
+    expect(res.headers.get('location')).toContain('status=error')
+    // DB should NOT be queried — request rejected before DB access
+    expect(prepare).not.toHaveBeenCalled()
   })
 
-  it('redirects to error page for unknown order', async () => {
-    const firstFn = vi.fn().mockResolvedValue(null)
+  it('redirects to error page when CheckMacValue is invalid', async () => {
+    const firstFn = vi.fn().mockResolvedValue({ id: 'order-1', status: 'paid' })
     const bind = vi.fn(() => ({ first: firstFn, run: vi.fn() }))
     const prepare = vi.fn(() => ({ bind }))
     const db = { prepare } as unknown as D1Database
@@ -321,11 +399,14 @@ describe('POST /ecpay/result (browser redirect)', () => {
       KV: {} as KVNamespace,
       AI: {} as Ai,
       ENVIRONMENT: 'test',
+      ECPAY_HASH_KEY: HASH_KEY,
+      ECPAY_HASH_IV: HASH_IV,
     } satisfies Env
     const app = createWebhookApp(env)
 
     const body = new URLSearchParams({
-      MerchantTradeNo: 'NONEXISTENT',
+      MerchantTradeNo: 'DX202603281200000001',
+      CheckMacValue: 'FORGED_SIGNATURE_VALUE_HERE',
     }).toString()
 
     const res = await app.request(
@@ -341,6 +422,8 @@ describe('POST /ecpay/result (browser redirect)', () => {
 
     expect(res.status).toBe(302)
     expect(res.headers.get('location')).toContain('status=error')
+    // DB should NOT be queried — request rejected before DB access
+    expect(prepare).not.toHaveBeenCalled()
   })
 })
 

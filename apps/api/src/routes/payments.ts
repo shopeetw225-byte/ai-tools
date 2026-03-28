@@ -143,6 +143,10 @@ payments.post('/ecpay/return', async (c) => {
 // OrderResultURL: browser redirect from ECPay (POST with result data)
 // Verifies signature, then redirects to frontend result page
 payments.post('/ecpay/result', async (c) => {
+  if (!c.env.ECPAY_HASH_KEY || !c.env.ECPAY_HASH_IV) {
+    return c.redirect('/zh-TW/payment/result?status=error', 302)
+  }
+
   const formData = await c.req.parseBody()
   const payload: Record<string, string> = {}
   for (const [key, value] of Object.entries(formData)) {
@@ -150,7 +154,16 @@ payments.post('/ecpay/result', async (c) => {
   }
 
   const merchantTradeNo = payload['MerchantTradeNo']
-  if (!merchantTradeNo) {
+  if (!merchantTradeNo || !payload['CheckMacValue']) {
+    return c.redirect('/zh-TW/payment/result?status=error', 302)
+  }
+
+  const valid = await verifyCheckMacValue(payload, {
+    hashKey: c.env.ECPAY_HASH_KEY,
+    hashIv: c.env.ECPAY_HASH_IV,
+  })
+
+  if (!valid) {
     return c.redirect('/zh-TW/payment/result?status=error', 302)
   }
 
