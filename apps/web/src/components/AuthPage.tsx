@@ -1,12 +1,16 @@
 import { useState, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { getDefaultLanguage, isSupportedLanguage } from '../lib/i18n-routing'
 
 type Mode = 'login' | 'register'
 
 export function AuthPage() {
   const { t } = useTranslation()
   const { login, register } = useAuth()
+  const params = useParams<{ lang: string }>()
+  const lang = isSupportedLanguage(params.lang) ? params.lang : getDefaultLanguage()
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,6 +27,8 @@ export function AuthPage() {
         await login(email, password)
       } else {
         await register(email, password, name || undefined)
+        window.location.replace(`/${lang}/chat`)
+        return
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
