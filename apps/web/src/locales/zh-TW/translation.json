@@ -1,0 +1,141 @@
+{
+  "app": {
+    "name": "AI 工具箱",
+    "tagline": "基於 Cloudflare"
+  },
+  "nav": {
+    "chat": "對話",
+    "tools": "工具",
+    "dashboard": "數據",
+    "signOut": "登出"
+  },
+  "loading": {
+    "general": "載入中…",
+    "analytics": "載入數據中…",
+    "pleaseWait": "請稍候…"
+  },
+  "auth": {
+    "title": "AI 工具箱",
+    "tagline": "基於 Cloudflare",
+    "login": "登入",
+    "register": "註冊",
+    "nameLabel": "名稱（選填）",
+    "namePlaceholder": "您的名稱",
+    "emailLabel": "電子郵件",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "密碼",
+    "passwordLoginPlaceholder": "••••••••",
+    "passwordRegisterPlaceholder": "至少 8 個字元",
+    "signIn": "登入",
+    "createAccount": "建立帳號",
+    "unknownError": "發生未知錯誤"
+  },
+  "chat": {
+    "title": "AI 對話",
+    "subtitle": "由 Llama 3.1 透過 Workers AI 驅動",
+    "clear": "清除",
+    "emptyState": "開始與 AI 對話",
+    "suggestions": {
+      "quantum": "用簡單的語言解釋量子計算",
+      "haiku": "寫一首關於 TypeScript 的俳句",
+      "workers": "什麼是 Cloudflare Workers？"
+    },
+    "inputPlaceholder": "問任何問題…",
+    "send": "送出",
+    "sending": "…"
+  },
+  "tools": {
+    "title": "AI 工具",
+    "subtitle": "即時 AI 輔助工具",
+    "runButton": "執行 {{name}}",
+    "running": "執行中…",
+    "result": "結果",
+    "copy": "複製",
+    "copied": "已複製！",
+    "inputExceedsChars": "輸入超過最大限制 {{max}} 個字元，請縮短您的輸入。",
+    "inputExceedsLines": "輸入超過最大限制 {{max}} 行，請縮短您的輸入。",
+    "summarize": {
+      "name": "摘要",
+      "description": "將任何文字壓縮成結構化要點",
+      "placeholder": "貼上要摘要的文字（最多 5,000 字元）…",
+      "short": "短（約 100 字）",
+      "medium": "中（約 300 字）",
+      "detailed": "詳細（約 500 字）"
+    },
+    "translate": {
+      "name": "翻譯",
+      "description": "在不同語言之間翻譯文字",
+      "placeholder": "輸入要翻譯的文字（最多 3,000 字元）…",
+      "autoDetect": "自動偵測",
+      "swapLanguages": "交換語言"
+    },
+    "explainCode": {
+      "name": "解釋程式碼",
+      "description": "取得任何程式碼的結構化解釋",
+      "placeholder": "貼上您的程式碼（最多 2,000 行）…",
+      "autoDetect": "自動偵測"
+    }
+  },
+  "dashboard": {
+    "title": "AI Gateway",
+    "subtitle": "最近 7 天 · Cloudflare AI Gateway 數據",
+    "refresh": "↺ 重新整理",
+    "retry": "重試",
+    "loading": "載入數據中…",
+    "notConfigured": "Analytics 尚未設定",
+    "failedToLoad": "載入數據失敗",
+    "configureToken": "設定您的 Cloudflare API Token 以啟用 AI Gateway 數據：",
+    "tokenPermission": "Token 需要 AI Gateway：讀取 權限。",
+    "metrics": {
+      "totalRequests": "總請求數",
+      "totalRequestsSub": "7 天合計",
+      "avgLatency": "平均延遲",
+      "avgLatencySub": "平均回應時間",
+      "errorRate": "錯誤率",
+      "errorRateSub": "{{count}} 次失敗",
+      "totalCost": "總費用",
+      "totalCostSub": "預估美元"
+    },
+    "charts": {
+      "dailyVolume": "每日請求量",
+      "modelUsage": "模型使用情況"
+    },
+    "cached": "已快取 — 每 5 分鐘更新"
+  },
+  "payment": {
+    "title": "付款",
+    "creditCard": "信用卡付款",
+    "atm": "ATM 轉帳",
+    "cvs": "超商代碼",
+    "success": {
+      "title": "付款成功",
+      "subtitle": "您的訂單已確認",
+      "orderNumber": "訂單編號",
+      "amount": "付款金額",
+      "transactionId": "交易編號",
+      "backHome": "返回首頁",
+      "viewOrder": "查看訂單"
+    },
+    "failure": {
+      "title": "付款失敗",
+      "subtitle": "請重試或選擇其他付款方式",
+      "reason": "失敗原因",
+      "retry": "重試付款",
+      "backHome": "返回首頁"
+    },
+    "processing": "付款處理中…",
+    "selectMethod": "選擇付款方式",
+    "orderSummary": "訂單摘要",
+    "total": "合計",
+    "currency": "TWD",
+    "inAppBrowserWarning": "建議使用外部瀏覽器完成付款以確保安全",
+    "openExternalBrowser": "在外部瀏覽器中開啟"
+  },
+  "errors": {
+    "networkError": "網路連線錯誤，請稍後再試",
+    "serverError": "伺服器發生錯誤，請稍後再試",
+    "authRequired": "請先登入",
+    "unknownError": "發生未知錯誤",
+    "inputRequired": "請填寫此欄位"
+  }
+}
