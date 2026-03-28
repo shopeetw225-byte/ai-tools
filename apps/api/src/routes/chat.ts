@@ -85,6 +85,11 @@ chat.post('/', async (c) => {
     // Non-fatal
   }
 
+  c.header('Content-Type', 'text/event-stream')
+  c.header('Cache-Control', 'no-cache')
+  c.header('X-Conversation-Id', conversationId ?? '')
+  c.header('X-Model', model)
+
   return stream(
     c,
     async (s) => {
@@ -158,14 +163,6 @@ chat.post('/', async (c) => {
         }
         await s.write('data: [DONE]\n\n')
       }
-    },
-    {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'X-Conversation-Id': conversationId ?? '',
-        'X-Model': model,
-      },
     },
   )
 })
