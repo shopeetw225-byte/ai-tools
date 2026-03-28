@@ -87,10 +87,14 @@ export function ResumeOptimizer() {
   }
 
   const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(output)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [output])
+    try {
+      await navigator.clipboard.writeText(output)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError(t('errors.copyFailed'))
+    }
+  }, [output, t])
 
   return (
     <div className="flex flex-col h-full py-4 sm:py-6">

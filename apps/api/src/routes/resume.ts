@@ -113,16 +113,7 @@ resume.post('/', async (c) => {
     }, 429)
   }
 
-  // Increment tool-specific usage
-  await c.env.DB
-    .prepare(
-      `INSERT INTO tool_daily_usage (user_id, tool_name, date, count) VALUES (?, 'resume-optimize', ?, 1)
-       ON CONFLICT(user_id, tool_name, date) DO UPDATE SET count = count + 1`,
-    )
-    .bind(userId, today)
-    .run()
-
-  // Record tool run
+  // Record tool run (usage incremented after successful AI call — see below)
   let toolRunId: string | undefined
   try {
     const result = await c.env.DB.prepare(
@@ -179,6 +170,18 @@ resume.post('/', async (c) => {
       .join('') ?? ''
 
     const { output, suggestions } = parseResponse(rawOutput)
+
+    // Increment tool-specific + global usage AFTER successful AI call
+    await c.env.DB.batch([
+      c.env.DB.prepare(
+        `INSERT INTO tool_daily_usage (user_id, tool_name, date, count) VALUES (?, 'resume-optimize', ?, 1)
+         ON CONFLICT(user_id, tool_name, date) DO UPDATE SET count = count + 1`,
+      ).bind(userId, today),
+      c.env.DB.prepare(
+        `INSERT INTO daily_usage (user_id, date, count) VALUES (?, ?, 1)
+         ON CONFLICT(user_id, date) DO UPDATE SET count = count + 1`,
+      ).bind(userId, today),
+    ])
 
     // Update tool run
     try {

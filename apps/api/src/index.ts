@@ -100,8 +100,12 @@ app.use('/api/v1/chat/*', rateLimitMiddleware)
 app.use('/api/v1/tools/*', rateLimitMiddleware)
 
 // Usage quota applied to AI inference routes (after auth, before handler)
+// resume-optimize handles its own global + tool quota to avoid double-counting
 app.use('/api/v1/chat/*', usageQuotaMiddleware)
-app.use('/api/v1/tools/*', usageQuotaMiddleware)
+app.use('/api/v1/tools/*', async (c, next) => {
+  if (c.req.path.startsWith('/api/v1/tools/resume-optimize')) return next()
+  return usageQuotaMiddleware(c, next)
+})
 
 app.route('/api/v1/chat', chatRoute)
 // Alias: GET /api/v1/models proxies to the chat route's /models handler
