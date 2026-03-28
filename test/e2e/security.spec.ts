@@ -57,6 +57,36 @@ test.describe('security audit', () => {
     })
   })
 
+  test.describe('webhook security', () => {
+    test('webhook rejects tampered CheckMacValue', async ({ request }) => {
+      const res = await request.post(`${API_URL}/api/v1/payments/ecpay/return`, {
+        form: {
+          MerchantTradeNo: 'DX202603281200000001',
+          RtnCode: '1',
+          TradeNo: '2026032800000001',
+          TradeAmt: '1000',
+          PaymentType: 'Credit_CreditCard',
+          CheckMacValue: 'A'.repeat(64), // tampered
+        },
+      })
+      expect(res.status()).toBe(400)
+      const text = await res.text()
+      expect(text).toContain('CheckMacValue invalid')
+    })
+
+    test('webhook requires both MerchantTradeNo and CheckMacValue', async ({ request }) => {
+      const res = await request.post(`${API_URL}/api/v1/payments/ecpay/return`, {
+        form: { RtnCode: '1' },
+      })
+      expect(res.status()).toBe(400)
+    })
+
+    test('order query endpoint enforces owner-only access', async ({ request }) => {
+      const res = await request.get(`${API_URL}/api/v1/payments/orders/test-id`)
+      expect(res.status()).toBe(401)
+    })
+  })
+
   test.describe('input validation', () => {
     test('API returns 404 for unknown routes', async ({ request }) => {
       const res = await request.get(`${API_URL}/api/v1/nonexistent`)

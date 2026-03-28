@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { isInAppBrowser, getInAppBrowserName } from '../lib/in-app-browser'
 
 type EcpayFields = Record<string, string | number>
 
@@ -18,6 +19,9 @@ export function PaymentCheckoutPage() {
   const [orderData, setOrderData] = useState<CreateOrderResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const inApp = isInAppBrowser()
+  const inAppName = getInAppBrowserName()
 
   const amount = parseInt(searchParams.get('amount') ?? '0', 10)
   const itemName = searchParams.get('itemName') ?? ''
@@ -68,6 +72,28 @@ export function PaymentCheckoutPage() {
       formRef.current.submit()
     }
   }, [orderData])
+
+  if (inApp) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="text-center max-w-sm mx-auto px-6" data-testid="in-app-browser-warning">
+          <div className="text-4xl mb-4">&#x1F310;</div>
+          <h1 className="text-white text-lg font-semibold mb-2">
+            {t('payment.checkout.inAppTitle')}
+          </h1>
+          <p className="text-gray-400 text-sm mb-4">
+            {t('payment.checkout.inAppHint', { browser: inAppName ?? t('payment.checkout.inAppDefault') })}
+          </p>
+          <button
+            onClick={() => window.history.back()}
+            className="text-xs text-gray-400 hover:text-gray-200 px-3 py-1.5 rounded-lg border border-gray-700"
+          >
+            {t('payment.back')}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (

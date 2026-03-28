@@ -111,7 +111,10 @@
       "doNotClose": "请勿关闭此窗口",
       "missingParams": "缺少付款信息，请返回重试。",
       "notLoggedIn": "请先登录后再进行付款。",
-      "createFailed": "创建订单失败，请稍后再试。"
+      "createFailed": "创建订单失败，请稍后再试。",
+      "inAppTitle": "请使用外部浏览器",
+      "inAppHint": "检测到您正在 {{browser}} 内打开。为确保付款安全，请复制链接至 Safari 或 Chrome 打开。",
+      "inAppDefault": "应用程序"
     },
     "result": {
       "pending": {
