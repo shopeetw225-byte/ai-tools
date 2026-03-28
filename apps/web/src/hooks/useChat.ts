@@ -27,7 +27,6 @@ export function useChat() {
   ) {
     const decoder = new TextDecoder()
     let buffer = ''
-    let hasReceivedChunks = false
 
     try {
       while (true) {
@@ -57,7 +56,6 @@ export function useChat() {
             if (!isActiveRequest(requestId)) return
             if (parsed.conversationId) setConversationId(parsed.conversationId)
             if (parsed.text) {
-              hasReceivedChunks = true
               setStatus('streaming')
               setMessages(prev =>
                 prev.map(m =>
@@ -92,8 +90,7 @@ export function useChat() {
               const parsed = JSON.parse(data) as { text?: string; conversationId?: string }
               if (parsed.conversationId) setConversationId(parsed.conversationId)
               if (parsed.text) {
-                hasReceivedChunks = true
-                setMessages(prev =>
+                  setMessages(prev =>
                   prev.map(m =>
                     m.id === assistantMsgId ? { ...m, content: m.content + parsed.text } : m,
                   ),
