@@ -31,7 +31,7 @@ jobs:
         run: pnpm --filter api lint
 
       - name: Deploy API to Workers
-        run: pnpm --filter api deploy
+        run: pnpm --filter api run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
