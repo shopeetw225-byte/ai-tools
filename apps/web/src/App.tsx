@@ -10,8 +10,10 @@ import { PaymentResultPage } from './components/PaymentResultPage'
 import { PricingPage } from './components/PricingPage'
 import { OnboardingModal } from './components/OnboardingModal'
 import { UsageProgress } from './components/UsageProgress'
+import { EngagementUpsell } from './components/EngagementUpsell'
 import { useAuth } from './hooks/useAuth'
 import { useUsage } from './hooks/useUsage'
+import { useStreak } from './hooks/useStreak'
 import {
   detectLanguageFromPath,
   getDefaultLanguage,
@@ -28,9 +30,17 @@ function AppShell() {
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
   const { used, limit, isPro } = useUsage()
+  const streak = useStreak()
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('ai_tools_onboarded'),
   )
+  const [showEngagementUpsell, setShowEngagementUpsell] = useState(false)
+
+  useEffect(() => {
+    if (streak >= 3 && !isPro && !localStorage.getItem('ai_tools_upsell_dismissed')) {
+      setShowEngagementUpsell(true)
+    }
+  }, [streak, isPro])
   const currentLanguage = isSupportedLanguage(params.lang)
     ? params.lang
     : getDefaultLanguage()
@@ -137,6 +147,16 @@ function AppShell() {
 
       {showOnboarding && (
         <OnboardingModal onComplete={() => setShowOnboarding(false)} />
+      )}
+
+      {showEngagementUpsell && !showOnboarding && (
+        <EngagementUpsell
+          streak={streak}
+          onDismiss={() => {
+            localStorage.setItem('ai_tools_upsell_dismissed', new Date().toISOString().split('T')[0])
+            setShowEngagementUpsell(false)
+          }}
+        />
       )}
     </div>
   )

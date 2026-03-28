@@ -30,4 +30,33 @@ usage.get('/today', async (c) => {
   })
 })
 
+usage.get('/streak', async (c) => {
+  const userId = c.get('userId' as never) as string
+
+  // Get last 30 days of usage records ordered by date desc
+  const rows = await c.env.DB
+    .prepare('SELECT date FROM daily_usage WHERE user_id = ? AND count > 0 ORDER BY date DESC LIMIT 30')
+    .bind(userId)
+    .all<{ date: string }>()
+
+  let streak = 0
+  const today = new Date()
+  // Start checking from today backwards
+  for (let i = 0; i < 30; i++) {
+    const checkDate = new Date(today)
+    checkDate.setDate(today.getDate() - i)
+    const dateStr = checkDate.toISOString().split('T')[0]
+    if (rows.results?.some((r) => r.date === dateStr)) {
+      streak++
+    } else if (i === 0) {
+      // Today might not have usage yet, skip
+      continue
+    } else {
+      break
+    }
+  }
+
+  return c.json({ streak })
+})
+
 export default usage

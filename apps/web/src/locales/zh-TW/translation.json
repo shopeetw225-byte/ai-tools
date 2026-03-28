@@ -184,6 +184,12 @@
     "warning": "快用完了！升級 Pro 無限使用",
     "warningShort": "剩 {{remaining}} 次"
   },
+  "engagementUpsell": {
+    "title": "🔥 連續 {{streak}} 天使用！",
+    "description": "你已經是 AI Tools 的忠實用戶了！升級 Pro 享受無限使用，不再受每日額度限制。",
+    "cta": "升級 Pro — NT$99/月",
+    "dismiss": "繼續免費使用"
+  },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",
     "auth": {
