@@ -7,7 +7,8 @@ import { generateCheckMacValue } from '../lib/ecpay'
 function createDbMock() {
   const first = vi
     .fn()
-    .mockResolvedValueOnce({ id: 'order-1' })
+    .mockResolvedValueOnce(null)           // subscription check: no active trial
+    .mockResolvedValueOnce({ id: 'order-1' }) // INSERT orders RETURNING id
 
   const run = vi.fn().mockResolvedValue({ success: true })
 
