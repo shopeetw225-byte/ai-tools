@@ -3,6 +3,7 @@ import {
   AIRequestError,
   AIRequestTimeoutError,
   executeWithRetry,
+  streamAnthropicGateway,
 } from './ai-gateway'
 
 describe('executeWithRetry', () => {
@@ -106,6 +107,45 @@ describe('executeWithRetry', () => {
 
     await expectation
     expect(operation).toHaveBeenCalledTimes(1)
+
+    vi.useRealTimers()
+  })
+
+  it('times out stalled Anthropic gateway streams while reading', async () => {
+    vi.useFakeTimers()
+
+    globalThis.fetch = vi.fn(async () =>
+      new Response(
+        new ReadableStream({
+          async pull() {
+            await new Promise(() => {})
+          },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        },
+      ),
+    ) as typeof fetch
+
+    const stream = streamAnthropicGateway(
+      'https://gateway.ai.cloudflare.com/v1/account/gateway',
+      'test-key',
+      [{ role: 'user', content: 'hello' }],
+      'claude-3-haiku-20240307',
+      {
+        maxAttempts: 1,
+        timeoutMs: 30,
+        sleep: async () => {},
+      },
+    )
+
+    const nextChunk = stream.next()
+    const expectation = expect(nextChunk).rejects.toBeInstanceOf(AIRequestTimeoutError)
+
+    await vi.advanceTimersByTimeAsync(30)
+
+    await expectation
 
     vi.useRealTimers()
   })

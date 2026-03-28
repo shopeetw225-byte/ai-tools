@@ -115,4 +115,54 @@ describe('POST / chat route', () => {
     expect(body).toContain('data: [DONE]')
     expect(errorSpy).toHaveBeenCalled()
   }, 10_000)
+
+  it('times out stalled Workers AI streams and returns the friendly fallback', async () => {
+    vi.doMock('../lib/ai-gateway', async () => {
+      const actual = await vi.importActual<typeof import('../lib/ai-gateway')>(
+        '../lib/ai-gateway',
+      )
+
+      return {
+        ...actual,
+        AI_REQUEST_TIMEOUT_MS: 10,
+      }
+    })
+
+    const { default: chat } = await import('./chat')
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const env = {
+      DB: createDbMock(),
+      KV: {} as KVNamespace,
+      AI: {
+        run: vi.fn(
+          async () =>
+            new ReadableStream({
+              async pull() {
+                await new Promise(() => {})
+              },
+            }),
+        ),
+      } as unknown as Ai,
+      ENVIRONMENT: 'test',
+    } satisfies Env
+    const app = createApp(env, chat)
+
+    const res = await app.request(
+      new Request('http://localhost/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [{ role: 'user', content: 'hello' }],
+        }),
+      }),
+      {},
+      env,
+    )
+    const body = await res.text()
+
+    expect(res.status).toBe(200)
+    expect(body).toContain("Sorry, I couldn't generate a response right now. Please try again.")
+    expect(body).toContain('data: [DONE]')
+    expect(errorSpy).toHaveBeenCalled()
+  }, 10_000)
 })

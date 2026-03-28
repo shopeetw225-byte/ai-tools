@@ -6,6 +6,7 @@ import {
   AIRequestError,
   AI_REQUEST_TIMEOUT_MS,
   executeWithRetry,
+  readStreamWithTimeout,
   streamAnthropicGateway,
   workersAIGatewayOptions,
 } from '../lib/ai-gateway'
@@ -162,7 +163,10 @@ chat.post('/', async (c) => {
           const decoder = new TextDecoder()
 
           while (true) {
-            const { done, value } = await reader.read()
+            const { done, value } = await readStreamWithTimeout(
+              reader,
+              AI_REQUEST_TIMEOUT_MS,
+            )
             if (done) break
             const chunk = decoder.decode(value, { stream: true })
 

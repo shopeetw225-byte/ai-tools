@@ -74,6 +74,28 @@ function wait(ms: number): Promise<void> {
   })
 }
 
+export async function readStreamWithTimeout<T>(
+  reader: ReadableStreamDefaultReader<T>,
+  timeoutMs: number,
+): Promise<ReadableStreamReadResult<T>> {
+  const timeoutError = new AIRequestTimeoutError(timeoutMs)
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => {
+      reject(timeoutError)
+      queueMicrotask(() => {
+        void reader.cancel(timeoutError).catch(() => {})
+      })
+    }, timeoutMs)
+  })
+
+  try {
+    return await Promise.race([reader.read(), timeoutPromise])
+  } finally {
+    if (timeout) clearTimeout(timeout)
+  }
+}
+
 export async function executeWithRetry<T>(
   operation: (signal: AbortSignal) => Promise<T>,
   options: RetryOptions = {},
@@ -232,7 +254,7 @@ export async function* streamAnthropicGateway(
   const decoder = new TextDecoder()
 
   while (true) {
-    const { done, value } = await reader.read()
+    const { done, value } = await readStreamWithTimeout(reader, options.timeoutMs ?? AI_REQUEST_TIMEOUT_MS)
     if (done) break
     const chunk = decoder.decode(value, { stream: true })
 
