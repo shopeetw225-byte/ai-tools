@@ -1,0 +1,13 @@
+# Root wrangler config — shared bindings reference
+# Each app has its own wrangler.toml that extends this pattern.
+# Run `wrangler whoami` to confirm authenticated account.
+
+# ─── Resource IDs (fill in after `wrangler` provisioning) ───────────────────
+# After running provisioning commands, copy the generated IDs here and
+# into apps/api/wrangler.toml bindings.
+
+# D1 database_id   = "<output of: wrangler d1 create ai-tools-db>"
+# KV namespace_id  = "<output of: wrangler kv namespace create AI_TOOLS_KV>"
+# KV preview_id    = "<output of: wrangler kv namespace create AI_TOOLS_KV --preview>"
+# R2 bucket_name   = "ai-tools-assets"
+# AI Gateway ID    = "ai-tools-gateway"  (created via dashboard)
