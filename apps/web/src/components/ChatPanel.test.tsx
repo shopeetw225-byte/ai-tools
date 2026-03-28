@@ -56,7 +56,7 @@ describe('ChatPanel', () => {
     expect(await screen.findByText('Response')).toBeInTheDocument()
 
     // Clear button should be visible
-    const clearButton = screen.getByText('Clear')
+    const clearButton = screen.getByRole('button', { name: /clear/i })
     await user.click(clearButton)
 
     // Should go back to empty state
