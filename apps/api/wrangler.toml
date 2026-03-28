@@ -12,6 +12,9 @@ AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/a1540e7bbaec0f1785a7f339e
 
 # ─── Secrets (set via wrangler secret put) ───────────────────────────────────
 # ANTHROPIC_API_KEY — required for claude-haiku / claude-sonnet model selection
+# CLOUDFLARE_API_TOKEN — required for AI Gateway Analytics dashboard
+#   Token needs: AI Gateway Read permission
+#   Create at: https://dash.cloudflare.com/profile/api-tokens
 
 # ─── D1 Database ─────────────────────────────────────────────────────────────
 [[d1_databases]]

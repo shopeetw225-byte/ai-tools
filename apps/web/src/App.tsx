@@ -2,9 +2,10 @@ import { useState } from 'react'
 import { ChatPanel } from './components/ChatPanel'
 import { ToolPanel } from './components/ToolPanel'
 import { AuthPage } from './components/AuthPage'
+import { DashboardPanel } from './components/DashboardPanel'
 import { useAuth } from './hooks/useAuth'
 
-type Tab = 'chat' | 'tools'
+type Tab = 'chat' | 'tools' | 'dashboard'
 
 export default function App() {
   const { user, loading, isAuthenticated, logout } = useAuth()
@@ -50,6 +51,14 @@ export default function App() {
           >
             ⚡ Tools
           </button>
+          <button
+            onClick={() => setTab('dashboard')}
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              tab === 'dashboard' ? 'bg-gray-800 text-white' : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            📊 Dashboard
+          </button>
         </nav>
 
         <div className="flex items-center gap-3">
@@ -65,7 +74,9 @@ export default function App() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-3xl w-full mx-auto flex flex-col" style={{ height: 'calc(100vh - 57px)' }}>
-        {tab === 'chat' ? <ChatPanel /> : <ToolPanel />}
+        {tab === 'chat' && <ChatPanel />}
+        {tab === 'tools' && <ToolPanel />}
+        {tab === 'dashboard' && <DashboardPanel />}
       </main>
     </div>
   )
