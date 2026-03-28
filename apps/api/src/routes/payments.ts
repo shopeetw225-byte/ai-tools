@@ -108,13 +108,34 @@ payments.post('/ecpay/return', async (c) => {
 
   // Update order status (only transition from pending)
   const newStatus = rtnCode === 1 ? 'paid' : 'failed'
-  await c.env.DB
+  const updateResult = await c.env.DB
     .prepare(
       `UPDATE orders SET status = ?, updated_at = datetime('now')
        WHERE merchant_trade_no = ? AND status = 'pending'`,
     )
     .bind(newStatus, merchantTradeNo)
     .run()
+
+  // If payment succeeded, upsert subscription to pro
+  if (rtnCode === 1 && updateResult.meta.changes > 0) {
+    const order = await c.env.DB
+      .prepare('SELECT user_id FROM orders WHERE merchant_trade_no = ? LIMIT 1')
+      .bind(merchantTradeNo)
+      .first<{ user_id: string }>()
+
+    if (order) {
+      // Pro subscription: 30 days from now
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      await c.env.DB
+        .prepare(
+          `INSERT INTO subscriptions (user_id, plan, expires_at, updated_at)
+           VALUES (?, 'pro', ?, datetime('now'))
+           ON CONFLICT(user_id) DO UPDATE SET plan = 'pro', expires_at = ?, updated_at = datetime('now')`,
+        )
+        .bind(order.user_id, expiresAt, expiresAt)
+        .run()
+    }
+  }
 
   return c.text('1|OK')
 })
@@ -250,6 +271,61 @@ payments.get('/orders/:id', async (c) => {
   }
 
   return c.json(order)
+})
+
+// ─── Subscription status ──────────────────────────────────────────────────────
+
+payments.get('/subscription', async (c) => {
+  const userId = (c.get('userId' as never) as string | undefined)?.trim()
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  const sub = await c.env.DB
+    .prepare('SELECT plan, expires_at FROM subscriptions WHERE user_id = ? LIMIT 1')
+    .bind(userId)
+    .first<{ plan: string; expires_at: string | null }>()
+
+  if (!sub) {
+    return c.json({ plan: 'free', expiresAt: null })
+  }
+
+  // Check if pro subscription has expired
+  if (sub.plan === 'pro' && sub.expires_at && new Date(sub.expires_at) < new Date()) {
+    await c.env.DB
+      .prepare(`UPDATE subscriptions SET plan = 'free', expires_at = NULL, updated_at = datetime('now') WHERE user_id = ?`)
+      .bind(userId)
+      .run()
+    return c.json({ plan: 'free', expiresAt: null })
+  }
+
+  return c.json({ plan: sub.plan, expiresAt: sub.expires_at })
+})
+
+// ─── Usage status ─────────────────────────────────────────────────────────────
+
+payments.get('/usage', async (c) => {
+  const userId = (c.get('userId' as never) as string | undefined)?.trim()
+  if (!userId) {
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+  const usage = await c.env.DB
+    .prepare('SELECT count FROM daily_usage WHERE user_id = ? AND date = ? LIMIT 1')
+    .bind(userId, today)
+    .first<{ count: number }>()
+
+  const sub = await c.env.DB
+    .prepare('SELECT plan, expires_at FROM subscriptions WHERE user_id = ? LIMIT 1')
+    .bind(userId)
+    .first<{ plan: string; expires_at: string | null }>()
+
+  const isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) >= new Date())
+  const count = usage?.count ?? 0
+  const limit = isPro ? null : 10
+
+  return c.json({ count, limit, plan: isPro ? 'pro' : 'free' })
 })
 
 export default payments

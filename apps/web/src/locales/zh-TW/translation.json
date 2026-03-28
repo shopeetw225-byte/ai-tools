@@ -132,6 +132,31 @@
       "goToDashboard": "返回儀表板"
     }
   },
+  "pricing": {
+    "title": "選擇方案",
+    "subtitle": "升級 Pro 方案，享受無限使用",
+    "free": {
+      "name": "免費方案",
+      "price": "NT$0",
+      "period": "/月",
+      "features": ["每日 10 次免費使用", "基本 AI 工具", "聊天功能"],
+      "cta": "目前方案"
+    },
+    "pro": {
+      "name": "Pro 方案",
+      "price": "NT$99",
+      "period": "/月",
+      "features": ["無限制使用", "所有 AI 工具", "優先回應", "進階模型"],
+      "cta": "立即升級"
+    },
+    "paymentMethods": "支援付款方式：信用卡、ATM 轉帳、超商代碼"
+  },
+  "upgrade": {
+    "title": "已達今日免費額度上限",
+    "description": "您今日已使用 {{count}}/{{limit}} 次免費額度",
+    "cta": "升級 Pro 方案 NT$99/月",
+    "dismiss": "稍後再說"
+  },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",
     "auth": {

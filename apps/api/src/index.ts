@@ -57,6 +57,7 @@ import analyticsRoute from './routes/analytics'
 import paymentsRoute from './routes/payments'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
+import { usageQuotaMiddleware } from './middleware/usage-quota'
 
 // Auth routes (public — no auth required)
 app.route('/api/v1/auth', authRoute)
@@ -78,6 +79,10 @@ app.use('/api/v1/payments/*', async (c, next) => {
 // Rate limiting applied to AI inference routes
 app.use('/api/v1/chat/*', rateLimitMiddleware)
 app.use('/api/v1/tools/*', rateLimitMiddleware)
+
+// Usage quota applied to AI inference routes (after auth, before handler)
+app.use('/api/v1/chat/*', usageQuotaMiddleware)
+app.use('/api/v1/tools/*', usageQuotaMiddleware)
 
 app.route('/api/v1/chat', chatRoute)
 app.route('/api/v1/tools', toolsRoute)

@@ -7,6 +7,7 @@ import { AuthPage } from './components/AuthPage'
 import { DashboardPanel } from './components/DashboardPanel'
 import { PaymentCheckoutPage } from './components/PaymentCheckoutPage'
 import { PaymentResultPage } from './components/PaymentResultPage'
+import { PricingPage } from './components/PricingPage'
 import { useAuth } from './hooks/useAuth'
 import {
   detectLanguageFromPath,
@@ -119,6 +120,7 @@ function AppShell() {
           <Route path="chat" element={<ChatPanel />} />
           <Route path="tools" element={<ToolPanel />} />
           <Route path="dashboard" element={<DashboardPanel />} />
+          <Route path="pricing" element={<PricingPage />} />
           <Route path="payment/checkout" element={<PaymentCheckoutPage />} />
           <Route path="payment/result" element={<PaymentResultPage />} />
           <Route path="*" element={<Navigate to="chat" replace />} />
