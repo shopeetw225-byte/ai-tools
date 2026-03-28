@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+import { API_BASE } from '../lib/api'
 
 export function useStreak() {
   const [streak, setStreak] = useState(0)

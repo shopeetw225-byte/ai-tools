@@ -24,6 +24,7 @@ AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/a1540e7bbaec0f1785a7f339e
 binding = "DB"
 database_name = "catfish-ai-tools-db"
 database_id = "fa02ea94-817c-4aeb-873a-ede18e43b11e"
+migrations_dir = "../../db/migrations"
 
 # ─── KV Namespace (used for rate limiting) ───────────────────────────────────
 [[kv_namespaces]]

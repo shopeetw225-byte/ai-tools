@@ -6,7 +6,7 @@ type UsageData = {
   isPro: boolean
 }
 
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
+import { API_BASE } from '../lib/api'
 
 export function useUsage() {
   const [data, setData] = useState<UsageData>({ used: 0, limit: 10, isPro: false })

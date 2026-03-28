@@ -118,6 +118,17 @@ app.route('/api/v1/analytics', analyticsRoute)
 app.route('/api/v1/payments', paymentsRoute)
 app.route('/api/v1/usage', usageRoute)
 
+// ─── Error handler ────────────────────────────────────────────────────────────
+app.onError((err, c) => {
+  const isDev = c.env.ENVIRONMENT !== 'production'
+  console.error(`[ERROR] ${c.req.method} ${c.req.path}:`, err.message)
+  if (isDev) console.error(err.stack)
+  return c.json(
+    { error: isDev ? err.message : 'Internal Server Error' },
+    500,
+  )
+})
+
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'Not found' }, 404))
 
