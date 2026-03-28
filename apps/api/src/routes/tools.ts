@@ -55,6 +55,9 @@ const TOOL_PROMPTS: Record<ToolName, (input: string, opts: Record<string, string
   'explain-code': buildExplainCodePrompt,
 }
 
+const FRIENDLY_TOOL_ERROR =
+  'Unable to run this tool right now. Please try again.'
+
 function validateInput(name: ToolName, input: string): string | null {
   const limits = INPUT_LIMITS[name]
   if (limits.maxChars && input.length > limits.maxChars) {
@@ -150,7 +153,12 @@ tools.post('/:name', async (c) => {
     } catch {
       // Non-fatal
     }
-    return c.json({ error: 'AI inference failed', detail: String(err) }, 500)
+    console.error('tools.ai_error', {
+      tool: name,
+      toolRunId: toolRunId ?? null,
+      message: err instanceof Error ? err.message : String(err),
+    })
+    return c.json({ error: FRIENDLY_TOOL_ERROR }, 500)
   }
 })
 

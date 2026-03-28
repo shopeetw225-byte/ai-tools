@@ -118,6 +118,85 @@ describe('useChat', () => {
     expect(result.current.status).toBe('idle')
   })
 
+  it('removes an empty assistant placeholder when streaming is stopped', async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start() {},
+    })
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: stream,
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useChat())
+
+    act(() => {
+      void result.current.sendMessage('Hi')
+    })
+
+    await waitFor(() => {
+      expect(result.current.messages).toHaveLength(2)
+    })
+
+    act(() => {
+      result.current.stopStreaming()
+    })
+
+    expect(result.current.messages).toEqual([
+      expect.objectContaining({ role: 'user', content: 'Hi' }),
+    ])
+    expect(result.current.status).toBe('idle')
+  })
+
+  it('keeps partial assistant content and marks it aborted when streaming is stopped', async () => {
+    let streamController!: ReadableStreamDefaultController<Uint8Array>
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        streamController = controller
+      },
+    })
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: stream,
+    } as unknown as Response)
+
+    const { result } = renderHook(() => useChat())
+    const encoder = new TextEncoder()
+
+    act(() => {
+      void result.current.sendMessage('Hi')
+    })
+
+    await waitFor(() => {
+      expect(result.current.messages).toHaveLength(2)
+    })
+
+    act(() => {
+      streamController.enqueue(encoder.encode(sseFrame({ text: 'Partial' })))
+    })
+
+    await waitFor(() => {
+      expect(result.current.messages[1]?.content).toBe('Partial')
+    })
+
+    act(() => {
+      result.current.stopStreaming()
+    })
+
+    expect(result.current.status).toBe('idle')
+    expect(result.current.messages).toEqual([
+      expect.objectContaining({ role: 'user', content: 'Hi' }),
+      expect.objectContaining({
+        role: 'assistant',
+        content: 'Partial',
+        state: 'aborted',
+      }),
+    ])
+  })
+
   it('sets error state on non-abort failures', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,

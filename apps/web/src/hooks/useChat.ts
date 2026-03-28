@@ -20,6 +20,12 @@ export function useChat() {
       .map(({ role, content }) => ({ role, content }))
   }
 
+  function abortActiveRequest() {
+    activeRequestIdRef.current = null
+    abortRef.current?.abort()
+    abortRef.current = null
+  }
+
   async function processStream(
     reader: ReadableStreamDefaultReader<Uint8Array>,
     assistantMsgId: string,
@@ -273,14 +279,35 @@ export function useChat() {
     }
   }, [messages, conversationId])
 
+  const stopStreaming = useCallback(() => {
+    abortActiveRequest()
+    setMessages(prev => {
+      const lastAssistantIdx = prev.findLastIndex(
+        m => m.role === 'assistant' && m.state === 'streaming',
+      )
+
+      if (lastAssistantIdx < 0) return prev
+
+      const assistantMessage = prev[lastAssistantIdx]
+      if (!assistantMessage.content) {
+        return prev.filter((_, index) => index !== lastAssistantIdx)
+      }
+
+      return prev.map((message, index) =>
+        index === lastAssistantIdx
+          ? { ...message, state: 'aborted' as const }
+          : message,
+      )
+    })
+    setStatus('idle')
+  }, [])
+
   const clearChat = useCallback(() => {
-    activeRequestIdRef.current = null
-    abortRef.current?.abort()
-    abortRef.current = null
+    abortActiveRequest()
     setMessages([])
     setConversationId(undefined)
     setStatus('idle')
   }, [])
 
-  return { messages, status, sendMessage, retryLastMessage, clearChat, conversationId }
+  return { messages, status, sendMessage, retryLastMessage, stopStreaming, clearChat, conversationId }
 }

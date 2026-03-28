@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { ChatPanel } from './ChatPanel'
@@ -91,5 +91,43 @@ describe('ChatPanel', () => {
 
     // Should show recovered response
     expect(await screen.findByText('Recovered!')).toBeInTheDocument()
+  })
+
+  it('keeps clear available while streaming and can stop a partial response', async () => {
+    let streamController!: ReadableStreamDefaultController<Uint8Array>
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        streamController = controller
+      },
+    })
+
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      body: stream,
+    } as unknown as Response)
+
+    const user = userEvent.setup()
+    const encoder = new TextEncoder()
+    render(<ChatPanel />)
+
+    const textarea = screen.getByPlaceholderText(/ask anything/i)
+    await user.type(textarea, 'Streaming test{Enter}')
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /stop/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /clear/i })).toBeInTheDocument()
+    })
+
+    act(() => {
+      streamController.enqueue(encoder.encode(sseFrame({ text: 'Partial reply' })))
+    })
+
+    expect(await screen.findByText('Partial reply')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /stop/i }))
+
+    expect(screen.getByText('Partial reply')).toBeInTheDocument()
+    expect(document.querySelector('[data-state=\"aborted\"]')).toBeInTheDocument()
   })
 })

@@ -4,7 +4,7 @@ import { ChatConversation } from './chat/ChatConversation'
 import { ChatComposer } from './chat/ChatComposer'
 
 export function ChatPanel() {
-  const { messages, status, sendMessage, retryLastMessage, clearChat } = useChat()
+  const { messages, status, sendMessage, retryLastMessage, stopStreaming, clearChat } = useChat()
   const [composerValue, setComposerValue] = useState<string | undefined>()
 
   const isDisabled = status === 'submitting' || status === 'streaming'
@@ -26,14 +26,26 @@ export function ChatPanel() {
           <h2 className="font-semibold text-white">Chat</h2>
           <p className="text-xs text-gray-500">Powered by Llama 3.1 via Workers AI</p>
         </div>
-        {messages.length > 0 && (
-          <button
-            onClick={clearChat}
-            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
-          >
-            Clear
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {isDisabled && (
+            <button
+              type="button"
+              onClick={stopStreaming}
+              className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Stop
+            </button>
+          )}
+          {messages.length > 0 && (
+            <button
+              type="button"
+              onClick={clearChat}
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Conversation */}

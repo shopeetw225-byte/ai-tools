@@ -52,6 +52,12 @@ function InlineMarkdown({ text }: { text: string }) {
 
 export function ChatMessageBubble({ message }: Props) {
   const isUser = message.role === 'user'
+  const assistantBubbleClassName =
+    message.state === 'error'
+      ? 'border border-red-800/50 bg-red-900/30 text-red-200'
+      : message.state === 'aborted'
+        ? 'border border-amber-700/40 bg-amber-950/30 text-amber-100'
+        : 'bg-gray-800 text-gray-100'
 
   if (isUser) {
     return (
@@ -67,17 +73,16 @@ export function ChatMessageBubble({ message }: Props) {
     <div className="flex justify-start">
       <div
         data-state={message.state}
-        className={`max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed ${
-          message.state === 'error'
-            ? 'bg-red-900/30 text-red-200 border border-red-800/50'
-            : 'bg-gray-800 text-gray-100'
-        }`}
+        className={`max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm leading-relaxed ${assistantBubbleClassName}`}
       >
         {message.content ? (
           <SimpleMarkdown content={message.content} />
         ) : null}
         {message.state === 'streaming' && (
           <span className="animate-pulse">▋</span>
+        )}
+        {message.state === 'aborted' && (
+          <div className="mt-2 text-xs text-amber-300">Generation stopped</div>
         )}
       </div>
     </div>
