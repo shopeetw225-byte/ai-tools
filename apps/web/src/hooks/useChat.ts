@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import i18n from '../i18n'
 
 export type Message = {
   id: string
@@ -81,7 +82,7 @@ export function useChat() {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantMsgId
-              ? { ...m, content: 'Sorry, something went wrong. Please try again.', streaming: false }
+              ? { ...m, content: i18n.t('errors.generic'), streaming: false }
               : m
           )
         )

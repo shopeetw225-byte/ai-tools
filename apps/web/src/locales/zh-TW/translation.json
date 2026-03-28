@@ -1,0 +1,113 @@
+{
+  "app": {
+    "name": "AI Tools",
+    "tagline": "on Cloudflare"
+  },
+  "loading": {
+    "app": "載入中…",
+    "analytics": "載入分析資料中…"
+  },
+  "nav": {
+    "chat": "聊天",
+    "tools": "工具",
+    "dashboard": "儀表板",
+    "signOut": "登出",
+    "language": "語言",
+    "localeLabel": "繁體中文"
+  },
+  "auth": {
+    "login": "登入",
+    "register": "註冊",
+    "nameLabel": "名稱（選填）",
+    "namePlaceholder": "您的名稱",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "passwordLabel": "密碼",
+    "passwordLoginPlaceholder": "••••••••",
+    "passwordRegisterPlaceholder": "至少 8 個字元",
+    "submitLoading": "請稍候…",
+    "signIn": "登入",
+    "createAccount": "建立帳號"
+  },
+  "chat": {
+    "title": "聊天",
+    "subtitle": "由 Workers AI 上的 Llama 3.1 驅動",
+    "clear": "清除",
+    "emptyTitle": "開始與 AI 對話",
+    "suggestions": {
+      "simpleQuantum": "用簡單方式解釋量子運算",
+      "typescriptHaiku": "寫一首關於 TypeScript 的俳句",
+      "workersIntro": "Cloudflare Workers 是什麼？"
+    },
+    "inputPlaceholder": "想問什麼都可以…",
+    "send": "送出",
+    "sending": "傳送中…"
+  },
+  "tools": {
+    "title": "AI 工具",
+    "subtitle": "即時 AI 輔助工具",
+    "summarize": {
+      "name": "摘要",
+      "description": "將任何文字濃縮成結構化重點",
+      "placeholder": "貼上要摘要的文字（最多 5,000 字）…"
+    },
+    "translate": {
+      "name": "翻譯",
+      "description": "在多種語言之間翻譯文字",
+      "placeholder": "輸入要翻譯的文字（最多 3,000 字）…",
+      "autoDetect": "自動偵測",
+      "swap": "交換語言"
+    },
+    "explainCode": {
+      "name": "解釋程式碼",
+      "description": "取得任何程式碼的結構化說明",
+      "placeholder": "把程式碼貼在這裡（最多 2,000 行）…"
+    },
+    "codeLanguage": {
+      "autoDetect": "自動偵測"
+    },
+    "summaryLength": {
+      "short": "短（約 100 字）",
+      "medium": "中（約 300 字）",
+      "detailed": "詳盡（約 500 字）"
+    },
+    "run": "執行 {{name}}",
+    "running": "執行中…",
+    "result": "結果",
+    "copy": "複製",
+    "copied": "已複製！",
+    "inputExceedsChars": "輸入超過上限 {{max}} 個字元，請縮短內容。",
+    "inputExceedsLines": "輸入超過上限 {{max}} 行，請縮短內容。"
+  },
+  "dashboard": {
+    "title": "AI Gateway",
+    "subtitle": "最近 7 天 · Cloudflare AI Gateway Analytics",
+    "refresh": "↺ 重新整理",
+    "notConfigured": "尚未設定 Analytics",
+    "loadError": "載入分析資料失敗",
+    "notConfiguredHelp": "請設定 Cloudflare API token 以啟用 AI Gateway analytics：",
+    "tokenPermission": "Token 需要 AI Gateway: Read 權限。",
+    "retry": "重試",
+    "metrics": {
+      "totalRequests": "總請求數",
+      "totalRequestsSub": "7 天總計",
+      "avgLatency": "平均延遲",
+      "avgLatencySub": "平均回應時間",
+      "errorRate": "錯誤率",
+      "errorRateSub": "{{count}} 次失敗",
+      "totalCost": "總成本",
+      "totalCostSub": "估算 USD"
+    },
+    "dailyVolume": "每日請求量",
+    "modelUsage": "模型使用量",
+    "cached": "已快取，每 5 分鐘更新",
+    "errorSuffix": "% 錯誤"
+  },
+  "errors": {
+    "generic": "抱歉，系統發生錯誤，請稍後再試。",
+    "auth": {
+      "loginFailed": "登入失敗",
+      "registrationFailed": "註冊失敗"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import i18n from '../i18n'
 
 export type User = {
   id: string
@@ -60,7 +61,7 @@ export function useAuth() {
         body: JSON.stringify({ email, password }),
       })
       const data = await res.json() as { token?: string; user?: User; error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'Login failed')
+      if (!res.ok) throw new Error(data.error ?? i18n.t('errors.auth.loginFailed'))
       setToken(data.token!)
       setState((s) => ({ ...s, user: data.user!, token: data.token! }))
     },
@@ -75,7 +76,7 @@ export function useAuth() {
         body: JSON.stringify({ email, password, name }),
       })
       const data = await res.json() as { token?: string; user?: User; error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'Registration failed')
+      if (!res.ok) throw new Error(data.error ?? i18n.t('errors.auth.registrationFailed'))
       setToken(data.token!)
       setState((s) => ({ ...s, user: data.user!, token: data.token! }))
     },

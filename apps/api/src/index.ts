@@ -17,6 +17,17 @@ export type Env = {
 
 const app = new Hono<{ Bindings: Env }>()
 
+function pickLanguageFromAcceptLanguage(header: string | null): 'zh-TW' | 'zh-CN' {
+  if (!header) return 'zh-TW'
+
+  const normalized = header.toLowerCase()
+  if (normalized.includes('zh-cn') || normalized.includes('zh-hans')) {
+    return 'zh-CN'
+  }
+
+  return 'zh-TW'
+}
+
 // ─── Global middleware ────────────────────────────────────────────────────────
 app.use('*', logger())
 app.use('*', secureHeaders())
@@ -25,6 +36,11 @@ app.use('/api/*', cors({
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }))
+
+app.get('/', (c) => {
+  const language = pickLanguageFromAcceptLanguage(c.req.header('Accept-Language') ?? null)
+  return c.redirect(`/${language}/`, 302)
+})
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (c) => c.json({ ok: true, env: c.env.ENVIRONMENT }))

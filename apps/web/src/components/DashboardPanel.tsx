@@ -1,4 +1,5 @@
 import { useAnalytics } from '../hooks/useAnalytics'
+import { useTranslation } from 'react-i18next'
 
 function MetricCard({
   label,
@@ -39,12 +40,13 @@ function MiniBar({ value, max }: { value: number; max: number }) {
 }
 
 export function DashboardPanel() {
+  const { t } = useTranslation()
   const { data, loading, error, refresh } = useAnalytics()
 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <span className="text-gray-500 text-sm">Loading analytics…</span>
+        <span className="text-gray-500 text-sm">{t('loading.analytics')}</span>
       </div>
     )
   }
@@ -55,16 +57,16 @@ export function DashboardPanel() {
       <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 text-center">
         <div className="text-4xl">📊</div>
         <div className="text-gray-300 text-sm font-medium">
-          {isNotConfigured ? 'Analytics not configured' : 'Failed to load analytics'}
+          {isNotConfigured ? t('dashboard.notConfigured') : t('dashboard.loadError')}
         </div>
         {isNotConfigured ? (
           <div className="text-gray-500 text-xs max-w-sm leading-relaxed">
-            Set your Cloudflare API token to enable AI Gateway analytics:
+            {t('dashboard.notConfiguredHelp')}
             <code className="block mt-2 bg-gray-800 rounded px-3 py-2 text-green-400 text-left whitespace-pre">
               {'cd apps/api\nwrangler secret put CLOUDFLARE_API_TOKEN'}
             </code>
             <span className="block mt-1">
-              Token needs <strong>AI Gateway: Read</strong> permission.
+              {t('dashboard.tokenPermission')}
             </span>
           </div>
         ) : (
@@ -74,7 +76,7 @@ export function DashboardPanel() {
           onClick={refresh}
           className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-600"
         >
-          Retry
+          {t('dashboard.retry')}
         </button>
       </div>
     )
@@ -95,41 +97,41 @@ export function DashboardPanel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-gray-200">AI Gateway</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Last 7 days · Cloudflare AI Gateway Analytics</p>
+          <h2 className="text-sm font-semibold text-gray-200">{t('dashboard.title')}</h2>
+          <p className="text-xs text-gray-500 mt-0.5">{t('dashboard.subtitle')}</p>
         </div>
         <button
           onClick={refresh}
           className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-3 py-1.5 rounded-lg border border-gray-700 hover:border-gray-600"
         >
-          ↺ Refresh
+          {t('dashboard.refresh')}
         </button>
       </div>
 
       {/* Summary metrics */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MetricCard
-          label="Total Requests"
+          label={t('dashboard.metrics.totalRequests')}
           value={summary.totalRequests.toLocaleString()}
-          sub="7-day total"
+          sub={t('dashboard.metrics.totalRequestsSub')}
           accent="blue"
         />
         <MetricCard
-          label="Avg Latency"
+          label={t('dashboard.metrics.avgLatency')}
           value={`${summary.avgLatencyMs.toLocaleString()} ms`}
-          sub="mean response time"
+          sub={t('dashboard.metrics.avgLatencySub')}
           accent={summary.avgLatencyMs > 3000 ? 'red' : summary.avgLatencyMs > 1500 ? 'yellow' : 'green'}
         />
         <MetricCard
-          label="Error Rate"
+          label={t('dashboard.metrics.errorRate')}
           value={`${errorPct}%`}
-          sub={`${summary.errorRequests} failed`}
+          sub={t('dashboard.metrics.errorRateSub', { count: summary.errorRequests })}
           accent={summary.errorRate > 0.05 ? 'red' : summary.errorRate > 0.01 ? 'yellow' : 'green'}
         />
         <MetricCard
-          label="Total Cost"
+          label={t('dashboard.metrics.totalCost')}
           value={`$${summary.totalCostUsd.toFixed(4)}`}
-          sub="estimated USD"
+          sub={t('dashboard.metrics.totalCostSub')}
           accent="yellow"
         />
       </div>
@@ -138,7 +140,7 @@ export function DashboardPanel() {
       {daily.length > 0 && (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
           <h3 className="text-xs text-gray-500 uppercase tracking-wide mb-4">
-            Daily Request Volume
+            {t('dashboard.dailyVolume')}
           </h3>
           <div className="space-y-2">
             {daily.map((d) => (
@@ -159,7 +161,7 @@ export function DashboardPanel() {
                         : 'text-gray-600'
                   }`}
                 >
-                  {(d.errorRate * 100).toFixed(1)}% err
+                  {(d.errorRate * 100).toFixed(1)}{t('dashboard.errorSuffix')}
                 </span>
               </div>
             ))}
@@ -171,7 +173,7 @@ export function DashboardPanel() {
       {topModels.length > 0 && (
         <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
           <h3 className="text-xs text-gray-500 uppercase tracking-wide mb-4">
-            Model Usage
+            {t('dashboard.modelUsage')}
           </h3>
           <div className="space-y-2">
             {topModels.map(([model, count]) => (
@@ -190,7 +192,7 @@ export function DashboardPanel() {
       )}
 
       {data.cached && (
-        <p className="text-xs text-gray-600 text-right">Cached — refreshes every 5 min</p>
+        <p className="text-xs text-gray-600 text-right">{t('dashboard.cached')}</p>
       )}
     </div>
   )
