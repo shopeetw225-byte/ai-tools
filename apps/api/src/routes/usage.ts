@@ -10,11 +10,15 @@ usage.get('/today', async (c) => {
 
   // Check subscription status
   const sub = await c.env.DB
-    .prepare('SELECT plan, expires_at FROM subscriptions WHERE user_id = ? LIMIT 1')
+    .prepare('SELECT plan, expires_at, trial_started_at, trial_used FROM subscriptions WHERE user_id = ? LIMIT 1')
     .bind(userId)
-    .first<{ plan: string; expires_at: string | null }>()
+    .first<{ plan: string; expires_at: string | null; trial_started_at: string | null; trial_used: number }>()
 
   const isPro = sub?.plan === 'pro' && (!sub.expires_at || new Date(sub.expires_at) >= new Date())
+  const isTrial = isPro && !!sub?.trial_started_at
+  const trialDaysRemaining = isTrial && sub?.expires_at
+    ? Math.max(0, Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null
 
   // Get today's usage count
   const today = new Date().toISOString().split('T')[0]
@@ -27,6 +31,9 @@ usage.get('/today', async (c) => {
     used: row?.count ?? 0,
     limit: FREE_DAILY_LIMIT,
     isPro,
+    isTrial,
+    trialDaysRemaining,
+    trialUsed: !!sub?.trial_used,
   })
 })
 

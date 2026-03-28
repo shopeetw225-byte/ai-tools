@@ -72,6 +72,7 @@ import analyticsRoute from './routes/analytics'
 import paymentsRoute from './routes/payments'
 import usageRoute from './routes/usage'
 import resumeRoute from './routes/resume'
+import trialRoute from './routes/trial'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
 import { usageQuotaMiddleware } from './middleware/usage-quota'
@@ -86,6 +87,7 @@ app.use('/api/v1/tools/*', authMiddleware)
 app.use('/api/v1/conversations/*', authMiddleware)
 app.use('/api/v1/analytics/*', authMiddleware)
 app.use('/api/v1/usage/*', authMiddleware)
+app.use('/api/v1/trial/*', authMiddleware)
 // ECPay callbacks are public: /ecpay/return (server webhook) and /ecpay/result (browser redirect)
 app.use('/api/v1/payments/*', async (c, next) => {
   const path = c.req.path
@@ -123,6 +125,7 @@ app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)
 app.route('/api/v1/payments', paymentsRoute)
 app.route('/api/v1/usage', usageRoute)
+app.route('/api/v1/trial', trialRoute)
 
 // ─── Error handler ────────────────────────────────────────────────────────────
 app.onError((err, c) => {

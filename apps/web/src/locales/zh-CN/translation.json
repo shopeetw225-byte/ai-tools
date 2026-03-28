@@ -138,6 +138,7 @@
   "pricing": {
     "title": "选择方案",
     "subtitle": "升级 Pro 方案，享受无限使用",
+    "currentPlan": "当前方案",
     "free": {
       "name": "免费方案",
       "price": "NT$0",
@@ -181,6 +182,15 @@
     "skip": "我先自己探索",
     "toolsHint": "从这里开始！贴上一段文字，AI 帮你浓缩成重点 ✨",
     "toolsHintDismiss": "我知道了"
+  },
+  "trial": {
+    "cta": "免费试用 Pro 7 天",
+    "badge": "Pro 试用中（剩 {{days}} 天）",
+    "activeBanner": "您正在 Pro 免费试用中，还有 {{days}} 天可体验所有功能",
+    "expiringBanner": "Pro 试用即将到期！升级以继续使用所有功能",
+    "inProgress": "试用进行中",
+    "alreadyUsed": "已使用过免费试用",
+    "cannotSubscribe": "试用期间无法启动付费订阅，请等待试用结束后再升级"
   },
   "usage": {
     "counter": "今日 {{used}}/{{limit}}",

@@ -4,10 +4,20 @@ interface UsageProgressProps {
   used: number
   limit: number
   isPro: boolean
+  isTrial?: boolean
+  trialDaysRemaining?: number | null
 }
 
-export function UsageProgress({ used, limit, isPro }: UsageProgressProps) {
+export function UsageProgress({ used, limit, isPro, isTrial, trialDaysRemaining }: UsageProgressProps) {
   const { t } = useTranslation()
+
+  if (isTrial && trialDaysRemaining != null) {
+    return (
+      <span className="text-xs text-blue-400 font-medium">
+        {t('trial.badge', { days: trialDaysRemaining })}
+      </span>
+    )
+  }
 
   if (isPro) return null
 

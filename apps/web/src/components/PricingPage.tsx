@@ -1,8 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { API_BASE } from '../lib/api'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+
+type SubscriptionInfo = {
+  plan: string
+  expiresAt: string | null
+  isTrial: boolean
+  trialExpiresAt: string | null
+  trialDaysRemaining: number | null
+  trialUsed: boolean
+}
 
 export function PricingPage() {
   const { t } = useTranslation()
@@ -10,7 +19,19 @@ export function PricingPage() {
   const navigate = useNavigate()
   const { token } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [trialLoading, setTrialLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [subInfo, setSubInfo] = useState<SubscriptionInfo | null>(null)
+
+  useEffect(() => {
+    if (!token) return
+    fetch(`${API_BASE}/api/v1/payments/subscription`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => setSubInfo(data as SubscriptionInfo))
+      .catch(() => {})
+  }, [token])
 
   const handleSubscribe = async () => {
     if (!token) return
@@ -33,7 +54,11 @@ export function PricingPage() {
 
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error ?? t('errors.generic'))
+        if (data.error === 'trial_active') {
+          setError(t('trial.cannotSubscribe'))
+        } else {
+          setError(data.error ?? t('errors.generic'))
+        }
         return
       }
 
@@ -59,6 +84,39 @@ export function PricingPage() {
     }
   }
 
+  const handleStartTrial = async () => {
+    if (!token) return
+    setTrialLoading(true)
+    setError(null)
+
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/trial/start`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.message ?? t('errors.generic'))
+        return
+      }
+
+      // Trial started — refresh subscription info and redirect to chat
+      navigate(`/${lang}/chat`)
+    } catch {
+      setError(t('errors.generic'))
+    } finally {
+      setTrialLoading(false)
+    }
+  }
+
+  const isCurrentlyTrial = subInfo?.isTrial === true
+  const isCurrentlyPro = subInfo?.plan === 'pro' && !subInfo.isTrial
+  const canTrial = !subInfo?.trialUsed && subInfo?.plan !== 'pro'
+
   const plans = [
     {
       key: 'free' as const,
@@ -76,6 +134,24 @@ export function PricingPage() {
         <h1 className="text-3xl font-bold text-white">{t('pricing.title')}</h1>
         <p className="text-gray-400">{t('pricing.subtitle')}</p>
       </div>
+
+      {/* Trial expiry warning banner */}
+      {isCurrentlyTrial && subInfo?.trialDaysRemaining != null && subInfo.trialDaysRemaining <= 1 && (
+        <div className="w-full max-w-2xl bg-amber-900/30 border border-amber-700 rounded-lg px-4 py-3 text-center">
+          <p className="text-amber-300 text-sm font-medium">
+            {t('trial.expiringBanner', { days: subInfo.trialDaysRemaining })}
+          </p>
+        </div>
+      )}
+
+      {/* Active trial info banner */}
+      {isCurrentlyTrial && subInfo?.trialDaysRemaining != null && subInfo.trialDaysRemaining > 1 && (
+        <div className="w-full max-w-2xl bg-blue-900/30 border border-blue-700 rounded-lg px-4 py-3 text-center">
+          <p className="text-blue-300 text-sm font-medium">
+            {t('trial.activeBanner', { days: subInfo.trialDaysRemaining })}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
         {plans.map(({ key, highlighted }) => (
@@ -113,13 +189,27 @@ export function PricingPage() {
             </ul>
 
             {highlighted ? (
-              <button
-                onClick={handleSubscribe}
-                disabled={loading}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50"
-              >
-                {loading ? t('auth.submitLoading') : t(`pricing.${key}.cta`)}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={handleSubscribe}
+                  disabled={loading || isCurrentlyTrial || isCurrentlyPro}
+                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-indigo-600 transition-all disabled:opacity-50"
+                >
+                  {loading ? t('auth.submitLoading') : isCurrentlyPro ? t('pricing.currentPlan') : isCurrentlyTrial ? t('trial.inProgress') : t(`pricing.${key}.cta`)}
+                </button>
+                {canTrial && (
+                  <button
+                    onClick={handleStartTrial}
+                    disabled={trialLoading}
+                    className="w-full py-2.5 text-blue-400 border border-blue-500/40 rounded-lg text-sm font-medium hover:bg-blue-500/10 transition-all disabled:opacity-50"
+                  >
+                    {trialLoading ? t('auth.submitLoading') : t('trial.cta')}
+                  </button>
+                )}
+                {subInfo?.trialUsed && !isCurrentlyTrial && !isCurrentlyPro && (
+                  <p className="text-xs text-gray-500 text-center">{t('trial.alreadyUsed')}</p>
+                )}
+              </div>
             ) : (
               <div className="w-full py-3 text-center text-gray-500 border border-gray-700 rounded-lg text-sm">
                 {t(`pricing.${key}.cta`)}

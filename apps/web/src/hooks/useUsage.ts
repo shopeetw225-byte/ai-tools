@@ -4,12 +4,15 @@ type UsageData = {
   used: number
   limit: number
   isPro: boolean
+  isTrial: boolean
+  trialDaysRemaining: number | null
+  trialUsed: boolean
 }
 
 import { API_BASE } from '../lib/api'
 
 export function useUsage() {
-  const [data, setData] = useState<UsageData>({ used: 0, limit: 10, isPro: false })
+  const [data, setData] = useState<UsageData>({ used: 0, limit: 10, isPro: false, isTrial: false, trialDaysRemaining: null, trialUsed: false })
   const [loading, setLoading] = useState(true)
 
   const fetchUsage = useCallback(async () => {

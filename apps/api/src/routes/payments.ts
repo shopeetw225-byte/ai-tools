@@ -226,6 +226,16 @@ payments.post('/create', async (c) => {
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
+  // Block payment during active trial period
+  const activeSub = await c.env.DB
+    .prepare('SELECT plan, expires_at, trial_started_at FROM subscriptions WHERE user_id = ? LIMIT 1')
+    .bind(userId)
+    .first<{ plan: string; expires_at: string | null; trial_started_at: string | null }>()
+
+  if (activeSub?.plan === 'pro' && activeSub.trial_started_at && activeSub.expires_at && new Date(activeSub.expires_at) >= new Date()) {
+    return c.json({ error: 'trial_active', message: '試用期間無法啟動付費訂閱，請等待試用結束後再升級' }, 409)
+  }
+
   const merchantTradeDate = formatMerchantTradeDate(new Date())
   const returnUrl = new URL(ECPAY_RETURN_PATH, c.req.url).toString()
   const orderResultUrl = new URL(ECPAY_ORDER_RESULT_PATH, c.req.url).toString()
@@ -317,24 +327,37 @@ payments.get('/subscription', async (c) => {
   }
 
   const sub = await c.env.DB
-    .prepare('SELECT plan, expires_at FROM subscriptions WHERE user_id = ? LIMIT 1')
+    .prepare('SELECT plan, expires_at, trial_started_at, trial_used FROM subscriptions WHERE user_id = ? LIMIT 1')
     .bind(userId)
-    .first<{ plan: string; expires_at: string | null }>()
+    .first<{ plan: string; expires_at: string | null; trial_started_at: string | null; trial_used: number }>()
 
   if (!sub) {
-    return c.json({ plan: 'free', expiresAt: null })
+    return c.json({ plan: 'free', expiresAt: null, isTrial: false, trialExpiresAt: null, trialDaysRemaining: null, trialUsed: false })
   }
 
-  // Check if pro subscription has expired
+  // Check if pro subscription has expired (includes trial expiry)
   if (sub.plan === 'pro' && sub.expires_at && new Date(sub.expires_at) < new Date()) {
     await c.env.DB
-      .prepare(`UPDATE subscriptions SET plan = 'free', expires_at = NULL, updated_at = datetime('now') WHERE user_id = ?`)
+      .prepare(`UPDATE subscriptions SET plan = 'free', expires_at = NULL, trial_started_at = NULL, updated_at = datetime('now') WHERE user_id = ?`)
       .bind(userId)
       .run()
-    return c.json({ plan: 'free', expiresAt: null })
+    return c.json({ plan: 'free', expiresAt: null, isTrial: false, trialExpiresAt: null, trialDaysRemaining: null, trialUsed: !!sub.trial_used })
   }
 
-  return c.json({ plan: sub.plan, expiresAt: sub.expires_at })
+  const isTrial = sub.plan === 'pro' && !!sub.trial_started_at
+  const trialExpiresAt = isTrial ? sub.expires_at : null
+  const trialDaysRemaining = isTrial && sub.expires_at
+    ? Math.max(0, Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null
+
+  return c.json({
+    plan: sub.plan,
+    expiresAt: sub.expires_at,
+    isTrial,
+    trialExpiresAt,
+    trialDaysRemaining,
+    trialUsed: !!sub.trial_used,
+  })
 })
 
 // ─── Usage status ─────────────────────────────────────────────────────────────

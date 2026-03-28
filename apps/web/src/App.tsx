@@ -31,7 +31,7 @@ function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
-  const { used, limit, isPro } = useUsage()
+  const { used, limit, isPro, isTrial, trialDaysRemaining } = useUsage()
   const streak = useStreak()
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('ai_tools_onboarded'),
@@ -121,7 +121,7 @@ function AppShell() {
               </button>
             </div>
           </div>
-          <UsageProgress used={used} limit={limit} isPro={isPro} />
+          <UsageProgress used={used} limit={limit} isPro={isPro} isTrial={isTrial} trialDaysRemaining={trialDaysRemaining} />
 
           <nav className="flex flex-wrap gap-1" role="navigation">
             {navItems.map((item) => (
