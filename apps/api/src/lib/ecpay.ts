@@ -56,7 +56,8 @@ export function generateMerchantTradeNo(nowFactory: () => Date = () => new Date(
     String(now.getSeconds()).padStart(2, '0'),
   ]
 
-  return `${MERCHANT_TRADE_PREFIX}${parts.join('')}0001`
+  const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
+  return `${MERCHANT_TRADE_PREFIX}${parts.join('')}${rand}`
 }
 
 export function formatMerchantTradeDate(date: Date): string {

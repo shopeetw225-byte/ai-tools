@@ -66,7 +66,13 @@ describe('ecpay utility', () => {
   it('creates merchant trade numbers within the ECPay 20 character limit', () => {
     const merchantTradeNo = generateMerchantTradeNo(() => new Date('2026-03-28T12:34:56+08:00'))
 
-    expect(merchantTradeNo).toBe('DX202603281234560001')
+    expect(merchantTradeNo).toMatch(/^DX20260328123456\d{4}$/)
     expect(merchantTradeNo).toHaveLength(20)
+  })
+
+  it('generates different trade numbers on consecutive calls', () => {
+    const now = () => new Date('2026-03-28T12:34:56+08:00')
+    const results = new Set(Array.from({ length: 20 }, () => generateMerchantTradeNo(now)))
+    expect(results.size).toBeGreaterThan(1)
   })
 })

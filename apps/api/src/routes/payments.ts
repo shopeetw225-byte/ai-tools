@@ -202,17 +202,28 @@ payments.post('/create', async (c) => {
     return c.json({ error: 'Unauthorized' }, 401)
   }
 
-  const merchantTradeNo = generateMerchantTradeNo()
   const merchantTradeDate = formatMerchantTradeDate(new Date())
   const returnUrl = new URL(ECPAY_RETURN_PATH, c.req.url).toString()
   const orderResultUrl = new URL(ECPAY_ORDER_RESULT_PATH, c.req.url).toString()
 
-  const insertedOrder = await c.env.DB.prepare(
-    `INSERT INTO orders (merchant_trade_no, user_id, total_amount, status, choose_payment)
-     VALUES (?, ?, ?, 'pending', ?) RETURNING id`,
-  )
-    .bind(merchantTradeNo, userId, amount, choosePayment)
-    .first<{ id: string }>()
+  let merchantTradeNo = ''
+  let insertedOrder: { id: string } | null = null
+  for (let attempt = 0; attempt < 3; attempt++) {
+    merchantTradeNo = generateMerchantTradeNo()
+    try {
+      insertedOrder = await c.env.DB.prepare(
+        `INSERT INTO orders (merchant_trade_no, user_id, total_amount, status, choose_payment)
+         VALUES (?, ?, ?, 'pending', ?) RETURNING id`,
+      )
+        .bind(merchantTradeNo, userId, amount, choosePayment)
+        .first<{ id: string }>()
+      break
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      if (msg.includes('UNIQUE') && attempt < 2) continue
+      throw e
+    }
+  }
 
   if (!insertedOrder) {
     return c.json({ error: 'failed to create order' }, 500)
