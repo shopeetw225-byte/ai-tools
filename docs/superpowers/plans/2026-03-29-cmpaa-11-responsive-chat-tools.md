@@ -79,17 +79,23 @@ it('renders the authenticated shell with stacked-friendly navigation controls', 
 <div className="flex flex-wrap items-center gap-2 sm:justify-end">
 ```
 
-- [ ] **Step 6: 執行單測確認通過**
+- [ ] **Step 6: 讓 shell 主要控制項符合最小 44px 觸控區**
+
+```tsx
+className="min-h-11 rounded-lg px-4 py-2 text-sm"
+```
+
+- [ ] **Step 7: 執行單測確認通過**
 
 Run: `pnpm --filter @ai-tools/web test -- App.test.tsx`
 Expected: PASS
 
-- [ ] **Step 7: 執行型別檢查確認外殼未破壞 build**
+- [ ] **Step 8: 執行型別檢查確認外殼未破壞 build**
 
 Run: `pnpm --filter @ai-tools/web build`
 Expected: BUILD SUCCESS
 
-- [ ] **Step 8: 對共用 shell 的非目標頁面做 smoke regression**
+- [ ] **Step 9: 對共用 shell 的非目標頁面做 smoke regression**
 
 Run: `pnpm --filter @ai-tools/web test -- smoke.test.tsx`
 Expected: PASS，至少確認 Dashboard / Pricing / Payment route 不因 shell 調整而明顯破版
@@ -138,7 +144,7 @@ className="relative flex-1 overflow-y-auto px-3 py-4 sm:px-5"
 - [ ] **Step 5: 調整 `ChatMessageBubble.tsx` 的最大寬度與換行行為**
 
 ```tsx
-<div className="max-w-[88%] break-words rounded-2xl ... sm:max-w-[80%]">
+<div className="max-w-[88%] break-words [overflow-wrap:anywhere] rounded-2xl ... sm:max-w-[80%]">
 ```
 
 - [ ] **Step 6: 調整 `ChatComposer.tsx` 讓 textarea / send 按鈕在手機下可堆疊**
@@ -149,11 +155,12 @@ className="relative flex-1 overflow-y-auto px-3 py-4 sm:px-5"
 className="min-h-11 w-full rounded-xl ... sm:w-auto"
 ```
 
-- [ ] **Step 7: 擴充現有聊天測試以覆蓋新結構**
+- [ ] **Step 7: 擴充現有聊天測試以覆蓋新結構與長內容**
 
 ```tsx
 expect(screen.getByTestId('chat-scroll-region')).toBeInTheDocument()
 expect(screen.getByRole('button', { name: /send/i })).toHaveClass('w-full')
+expect(container.querySelector('[data-state=\"complete\"]')).toHaveClass('[overflow-wrap:anywhere]')
 ```
 
 - [ ] **Step 8: 執行聊天測試確認通過**
@@ -217,20 +224,26 @@ it('switches tools and keeps the primary action available', async () => {
 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
 ```
 
-- [ ] **Step 6: 調整 input / result 區塊避免小螢幕溢出**
+- [ ] **Step 6: 調整 input / result 區塊避免小螢幕溢出與長內容破版**
 
 ```tsx
 <div className="relative overflow-hidden rounded-xl">
 ...
-<div className="space-y-2 overflow-hidden">
+<div className="space-y-2 overflow-hidden [overflow-wrap:anywhere]">
 ```
 
-- [ ] **Step 7: 執行 ToolPanel 測試確認通過**
+- [ ] **Step 7: 讓 ToolPanel 主要控制項符合最小 44px 觸控區**
+
+```tsx
+className="min-h-11 rounded-lg px-3 py-2 text-sm"
+```
+
+- [ ] **Step 8: 執行 ToolPanel 測試確認通過**
 
 Run: `pnpm --filter @ai-tools/web test -- ToolPanel.test.tsx`
 Expected: PASS
 
-- [ ] **Step 8: 執行完整前端測試與 build**
+- [ ] **Step 9: 執行完整前端測試與 build**
 
 Run: `pnpm --filter @ai-tools/web test && pnpm --filter @ai-tools/web build`
 Expected: 全部 PASS，build 成功
@@ -246,12 +259,22 @@ Expected: 全部 PASS，build 成功
 Run: `pnpm --filter @ai-tools/web dev`
 Expected: Chat / Tools 無頁面級水平捲軸，互動元件可正常點擊，Dashboard / Pricing / Payment shell 無明顯破版
 
-- [ ] **Step 2: 執行 Lighthouse mobile 驗證**
+- [ ] **Step 2: 用長 URL、長 code、長單字做真實內容 smoke check**
+
+Run: `pnpm --filter @ai-tools/web dev`
+Expected: Chat bubble、Tool result、error 區塊不會因長內容撐出 viewport
+
+- [ ] **Step 3: 以登入後 happy path 狀態執行 Lighthouse**
+
+Run: `pnpm --filter @ai-tools/web build`
+Expected: 量測前確認無 onboarding modal、upsell、hint banner、blocking overlay
+
+- [ ] **Step 4: 執行 Lighthouse mobile 驗證**
 
 Run: `pnpm --filter @ai-tools/web build`
 Expected: 可進行本地預覽與 Lighthouse 檢查，`/<lang>/chat` 與 `/<lang>/tools` 的 Mobile Performance 均 >= 80
 
-- [ ] **Step 3: 更新文件中的驗證結果**
+- [ ] **Step 5: 更新文件中的驗證結果**
 
 ```md
 - 375px: PASS
@@ -260,7 +283,7 @@ Expected: 可進行本地預覽與 Lighthouse 檢查，`/<lang>/chat` 與 `/<lan
 - Lighthouse Mobile: >= 80
 ```
 
-- [ ] **Step 4: 提交變更**
+- [ ] **Step 6: 提交變更**
 
 ```bash
 git add apps/web/src/App.tsx apps/web/src/App.test.tsx \
@@ -280,7 +303,7 @@ git add apps/web/src/App.tsx apps/web/src/App.test.tsx \
 git commit -m "feat: 完成 CMPAA-11 響應式 Chat 與 Tools 優化"
 ```
 
-- [ ] **Step 5: 交接 QA**
+- [ ] **Step 7: 交接 QA**
 
 Run: `PATCH /api/issues/c67f2d37-d8b8-49ac-9de9-9ee1290e6f14`
 Expected: 狀態設為 `in_review`，assignee 改為 [QA 小趙](/CMPAA/agents/qa)

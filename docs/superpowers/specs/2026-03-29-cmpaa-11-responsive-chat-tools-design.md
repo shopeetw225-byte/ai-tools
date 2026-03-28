@@ -45,6 +45,34 @@
 3. 以結構化版面調整為主，避免一次性大改導覽模式。
 4. 補上足夠測試，讓後續微調不容易回歸。
 
+## 44px 觸控區驗收矩陣
+
+本任務中，只要是出現在 Chat / Tools route 上、且由本次響應式調整覆蓋到的主要互動元件，都必須滿足最小 44px 觸控區：
+
+- App shell
+  - 主導覽 tabs（Chat / Tools / Dashboard）
+  - 語系切換按鈕
+  - 登出按鈕
+- Chat
+  - suggestion chips
+  - stop / clear 按鈕
+  - textarea 可操作區
+  - send 按鈕
+  - back to bottom 按鈕
+  - retry 按鈕
+- Tools
+  - 工具切換 tabs
+  - summary length buttons
+  - translate swap 按鈕
+  - select / textarea / run 按鈕
+  - copy 按鈕
+
+不在本次矩陣內的項目：
+
+- 瀏覽器原生 UI
+- 不屬於 Chat / Tools route 的頁面內容控制項
+- 本次驗收流程中被固定關閉的 overlay / banner
+
 ## 非目標
 
 - 不重做整個導覽模式，例如新增 bottom navigation 或 mobile 專屬路由
@@ -122,6 +150,7 @@ Chat 以現有拆分後的元件為基礎處理：
   - 「回到底部」按鈕在手機上不遮擋主要內容或輸入區
 - `ChatMessageList` / `ChatMessageBubble`
   - 訊息最大寬度與內距依 breakpoint 微調，避免過窄或過寬
+  - 對長單字、長 URL、長 code token 採可斷行策略，例如 `overflow-wrap:anywhere`、`break-words` 或等效 Tailwind class
 - `ChatComposer.tsx`
   - 小螢幕優先處理輸入框與送出按鈕的排列
   - 送出按鈕與 textarea 保證至少 44px 高
@@ -136,6 +165,7 @@ Chat 以現有拆分後的元件為基礎處理：
 - translate 的來源語言、交換按鈕、目標語言在手機上需有自然降級版型
 - textarea、字數統計、執行按鈕、輸出區維持清楚的閱讀順序
 - copy / error / result 區塊在手機與平板上不出現橫向溢出
+- 對長翻譯結果、長 code、長 URL 與長單字輸出採可斷行策略，不能只靠容器縮窄
 
 ## 水平溢出定義
 
@@ -181,6 +211,12 @@ Chat 以現有拆分後的元件為基礎處理：
   - `/<lang>/chat`
   - `/<lang>/tools`
 - 以登入後狀態進入量測
+- 驗收時使用穩定的「happy path」頁面狀態：
+  - 不顯示 onboarding modal
+  - 不顯示 engagement / upgrade prompt
+  - 不顯示臨時 hint banner
+  - 不顯示錯誤 toast / blocking overlay
+- 若未來 Chat / Tools route 出現不可關閉且預設可見的常駐 banner，則該元件自動視為 in-scope
 - 驗收門檻為上述 route 各自的 Mobile Performance >= 80
 - 若分數不足，可做的額外優化限於前端頁面範圍，例如：
   - 移除不必要的同步渲染成本
@@ -206,7 +242,21 @@ Chat 以現有拆分後的元件為基礎處理：
 - 只修改展示層與容器層
 - 依賴既有聊天測試回歸確認
 
-### 風險 3：新加入的 i18n 文字導致寬度不可控
+### 風險 3：長內容導致局部溢出
+
+處理：
+
+- 對 bubble、result、error 區塊明確加入斷行策略
+- 手動驗證使用長 URL、長 code、長單字與多行輸出
+
+### 風險 4：Lighthouse 驗收狀態不一致
+
+處理：
+
+- 驗收固定在 happy path、登入後、無 overlay 狀態
+- 若驗收環境出現 overlay，先明確關閉或記錄為額外 scope
+
+### 風險 5：新加入的 i18n 文字導致寬度不可控
 
 處理：
 
