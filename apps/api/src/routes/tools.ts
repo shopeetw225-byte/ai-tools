@@ -4,13 +4,69 @@ import { workersAIGatewayOptions } from '../lib/ai-gateway'
 
 type ToolName = 'summarize' | 'translate' | 'explain-code'
 
+interface ToolRequest {
+  input: string
+  options?: Record<string, string>
+}
+
+const INPUT_LIMITS: Record<ToolName, { maxChars?: number; maxLines?: number }> = {
+  summarize: { maxChars: 5000 },
+  translate: { maxChars: 3000 },
+  'explain-code': { maxLines: 2000 },
+}
+
+function buildSummarizePrompt(input: string, opts: Record<string, string>): string {
+  const lengthMap: Record<string, string> = {
+    short: 'in approximately 100 characters, as a few concise bullet points',
+    medium: 'in approximately 300 characters, as structured bullet points',
+    detailed: 'in approximately 500 characters, as detailed bullet points with key insights',
+  }
+  const lengthInstruction = lengthMap[opts.summaryLength ?? 'medium'] ?? lengthMap.medium
+  return `Summarize the following text ${lengthInstruction}. Format the output as a bulleted list of key points:\n\n${input}`
+}
+
+function buildTranslatePrompt(input: string, opts: Record<string, string>): string {
+  const target = opts.targetLanguage ?? 'English'
+  const source = opts.sourceLanguage
+  const sourceInstruction = source && source !== 'auto'
+    ? `from ${source} `
+    : ''
+  return `Translate the following text ${sourceInstruction}to ${target}. Output only the translation, no explanation:\n\n${input}`
+}
+
+function buildExplainCodePrompt(input: string, opts: Record<string, string>): string {
+  const lang = opts.language
+  const langHint = lang && lang !== 'auto'
+    ? ` (written in ${lang})`
+    : ''
+  return `Explain the following code${langHint} clearly and in detail. Structure your response as:
+1. **Overview**: A brief summary of what the code does
+2. **Step-by-step explanation**: Walk through each section of the code
+3. **Potential issues**: Note any bugs, edge cases, or improvements (if applicable)
+
+\`\`\`
+${input}
+\`\`\``
+}
+
 const TOOL_PROMPTS: Record<ToolName, (input: string, opts: Record<string, string>) => string> = {
-  summarize: (input) =>
-    `Summarize the following text in 2-3 concise sentences:\n\n${input}`,
-  translate: (input, opts) =>
-    `Translate the following text to ${opts.targetLanguage ?? 'English'}. Output only the translation, no explanation:\n\n${input}`,
-  'explain-code': (input) =>
-    `Explain the following code clearly and concisely. Describe what it does, key concepts used, and any notable patterns:\n\n\`\`\`\n${input}\n\`\`\``,
+  summarize: buildSummarizePrompt,
+  translate: buildTranslatePrompt,
+  'explain-code': buildExplainCodePrompt,
+}
+
+function validateInput(name: ToolName, input: string): string | null {
+  const limits = INPUT_LIMITS[name]
+  if (limits.maxChars && input.length > limits.maxChars) {
+    return `Input exceeds maximum of ${limits.maxChars} characters (got ${input.length})`
+  }
+  if (limits.maxLines) {
+    const lineCount = input.split('\n').length
+    if (lineCount > limits.maxLines) {
+      return `Input exceeds maximum of ${limits.maxLines} lines (got ${lineCount})`
+    }
+  }
+  return null
 }
 
 const tools = new Hono<{ Bindings: Env }>()
@@ -22,10 +78,15 @@ tools.post('/:name', async (c) => {
     return c.json({ error: `Unknown tool: ${name}. Valid tools: ${Object.keys(TOOL_PROMPTS).join(', ')}` }, 400)
   }
 
-  const body = await c.req.json<{ input: string; options?: Record<string, string> }>()
+  const body = await c.req.json<ToolRequest>()
 
   if (!body.input?.trim()) {
     return c.json({ error: 'input required' }, 400)
+  }
+
+  const validationError = validateInput(name, body.input)
+  if (validationError) {
+    return c.json({ error: validationError }, 400)
   }
 
   const prompt = TOOL_PROMPTS[name](body.input, body.options ?? {})
