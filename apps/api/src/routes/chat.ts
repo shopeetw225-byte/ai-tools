@@ -67,13 +67,15 @@ chat.post('/', async (c) => {
   ]
 
   // Persist conversation + messages to D1 (best-effort, don't block stream)
+  const userId = c.get('userId' as never) as string
   let conversationId = body.conversationId
   try {
     if (!conversationId) {
       const convResult = await c.env.DB.prepare(
-        `INSERT INTO conversations (title, model) VALUES (?, ?) RETURNING id`,
+        `INSERT INTO conversations (user_id, title, model) VALUES (?, ?, ?) RETURNING id`,
       )
         .bind(
+          userId,
           body.messages[0]?.content?.slice(0, 60) ?? 'New chat',
           useAnthropic ? CLAUDE_MODELS[model] : WORKERS_AI_MODEL,
         )
