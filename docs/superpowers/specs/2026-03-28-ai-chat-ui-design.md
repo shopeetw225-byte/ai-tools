@@ -195,21 +195,27 @@ request body 維持與現有 API 相容的結構：
 
 ### SSE 契約
 
-前後端在本任務內應明確對齊以下 `data:` JSON 格式：
+`CMPAA-20` 以前端相容目前後端 SSE 形狀為準，不在本 task 內強制改動 `apps/api`：
 
 ```json
-{ "type": "meta", "conversationId": "..." }
-{ "type": "chunk", "text": "..." }
-{ "type": "error", "message": "...", "recoverable": true }
-{ "type": "done" }
+{ "text": "...", "conversationId": "...", "model": "..." }
+{ "text": "...", "error": "chat_generation_failed", "conversationId": "...", "model": "..." }
+```
+
+結束訊號維持：
+
+```text
+data: [DONE]
 ```
 
 規則：
 
 - 前端只解析 `data:` 行，不依賴 named event。
-- `type=done` 是正式結束訊號；前端保留對既有 `[DONE]` 的容錯支援，但新契約以 `done` frame 為準。
-- `type=error` 代表應把當前 assistant placeholder 轉為 `error` 狀態。
+- `text` chunk 直接 append 到當前 assistant placeholder。
+- 帶有 `error` 欄位的 frame 代表應把當前 assistant placeholder 轉為 `error` 狀態。
+- `conversationId` 可能出現在一般 chunk 或錯誤 chunk，前端都需要能更新。
 - stream 結尾若 buffer 仍有殘留內容，需要再做一次解析，不可直接丟棄。
+- 若未來 [CMPAA-21](/CMPAA/issues/CMPAA-21) 把後端升級為 `meta/chunk/error/done` frame，前端 parser 應以可擴充方式實作，但本次驗收仍以現況 SSE 為準。
 
 ## Markdown 策略
 
@@ -299,7 +305,7 @@ mock 邊界：
 
 - 元件與 hook 測試都以 mock `fetch` + 自建 `ReadableStream` 測 SSE
 - 不直接 mock `useChat` 來測 `ChatPanel`
-- 需要一個可重用的 stream helper 來輸出 `meta` / `chunk` / `error` / `done` frame
+- 需要一個可重用的 stream helper 來輸出目前 SSE 的 `data: { text, conversationId, model }` 與 `data: [DONE]`
 
 ### 建置驗證
 
