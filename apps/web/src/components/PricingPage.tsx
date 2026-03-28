@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { API_BASE } from '../lib/api'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
@@ -17,7 +18,7 @@ export function PricingPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/v1/payments/create', {
+      const res = await fetch(`${API_BASE}/api/v1/payments/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

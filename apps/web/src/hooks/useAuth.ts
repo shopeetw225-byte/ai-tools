@@ -13,8 +13,9 @@ type AuthState = {
   loading: boolean
 }
 
+import { API_BASE } from '../lib/api'
+
 const TOKEN_KEY = 'ai_tools_token'
-const API_BASE = import.meta.env.VITE_API_URL ?? ''
 
 export function useAuth() {
   const [state, setState] = useState<AuthState>({

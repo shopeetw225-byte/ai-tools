@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { API_BASE } from '../lib/api'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { isSupportedLanguage, getDefaultLanguage } from '../lib/i18n-routing'
@@ -28,7 +29,7 @@ export function PaymentResultPage() {
     }
 
     const timer = setTimeout(() => {
-      fetch(`/api/v1/payments/orders/${orderId}`, {
+      fetch(`${API_BASE}/api/v1/payments/orders/${orderId}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then(async (res) => {

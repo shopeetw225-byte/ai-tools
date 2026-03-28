@@ -5,7 +5,6 @@ dist/
 .env.local
 .dev.vars
 *.local
-apps/web/.env.production
 .worktrees/
 /test-results/
 /playwright-report/

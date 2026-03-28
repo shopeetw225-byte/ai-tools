@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-
-const API_URL = import.meta.env.VITE_API_URL ?? ''
+import { API_BASE } from '../lib/api'
 
 export interface DailyMetric {
   date: string
@@ -35,7 +34,7 @@ export function useAnalytics() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch(`${API_URL}/api/v1/analytics/gateway`, {
+      const res = await fetch(`${API_BASE}/api/v1/analytics/gateway`, {
         credentials: 'include',
       })
       if (!res.ok) {

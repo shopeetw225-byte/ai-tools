@@ -55,7 +55,7 @@ const CODE_LANGUAGES: CodeLanguageOption[] = [
   { value: 'Shell', label: 'Shell' },
 ]
 
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api/v1'
+import { API_BASE } from '../lib/api'
 
 export function ToolPanel() {
   const { t } = useTranslation()
@@ -141,7 +141,7 @@ export function ToolPanel() {
         options.language = codeLanguage
       }
 
-      const res = await fetch(`${API_BASE}/tools/${activeTool.id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/tools/${activeTool.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input, options }),

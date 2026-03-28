@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 import type { ChatMessage, ChatStatus } from '../components/chat/chat-types'
-
-const API_BASE = import.meta.env.VITE_API_URL ?? '/api/v1'
+import { API_BASE } from '../lib/api'
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -150,7 +149,7 @@ export function useChat() {
     abortRef.current = new AbortController()
 
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
+      const res = await fetch(`${API_BASE}/api/v1/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: transcript, conversationId }),
@@ -237,7 +236,7 @@ export function useChat() {
     abortRef.current = new AbortController()
 
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
+      const res = await fetch(`${API_BASE}/api/v1/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: transcript, conversationId }),

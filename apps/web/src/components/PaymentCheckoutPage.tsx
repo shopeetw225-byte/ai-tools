@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { API_BASE } from '../lib/api'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { isInAppBrowser, getInAppBrowserName } from '../lib/in-app-browser'
@@ -41,7 +42,7 @@ export function PaymentCheckoutPage() {
       return
     }
 
-    fetch('/api/v1/payments/create', {
+    fetch(`${API_BASE}/api/v1/payments/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
