@@ -6,3 +6,4 @@ dist/
 .dev.vars
 *.local
 apps/web/.env.production
+.worktrees/
