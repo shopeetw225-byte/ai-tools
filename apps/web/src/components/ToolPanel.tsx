@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ToolsHintBanner } from './ToolsHintBanner'
 
 type ToolId = 'summarize' | 'translate' | 'explain-code'
 
@@ -211,6 +212,7 @@ export function ToolPanel() {
 
       {/* Tool Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <ToolsHintBanner />
         <p className="text-xs text-gray-500">{toolLabels[activeTool.id].description}</p>
 
         {/* Tool-specific options */}

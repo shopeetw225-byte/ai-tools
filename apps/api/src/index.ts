@@ -70,6 +70,7 @@ import conversationsRoute from './routes/conversations'
 import authRoute from './routes/auth'
 import analyticsRoute from './routes/analytics'
 import paymentsRoute from './routes/payments'
+import usageRoute from './routes/usage'
 import { rateLimitMiddleware } from './middleware/rate-limit'
 import { authMiddleware } from './middleware/auth'
 import { usageQuotaMiddleware } from './middleware/usage-quota'
@@ -83,6 +84,7 @@ app.use('/api/v1/models', authMiddleware)
 app.use('/api/v1/tools/*', authMiddleware)
 app.use('/api/v1/conversations/*', authMiddleware)
 app.use('/api/v1/analytics/*', authMiddleware)
+app.use('/api/v1/usage/*', authMiddleware)
 // ECPay callbacks are public: /ecpay/return (server webhook) and /ecpay/result (browser redirect)
 app.use('/api/v1/payments/*', async (c, next) => {
   const path = c.req.path
@@ -114,6 +116,7 @@ app.route('/api/v1/tools', toolsRoute)
 app.route('/api/v1/conversations', conversationsRoute)
 app.route('/api/v1/analytics', analyticsRoute)
 app.route('/api/v1/payments', paymentsRoute)
+app.route('/api/v1/usage', usageRoute)
 
 // ─── 404 fallback ─────────────────────────────────────────────────────────────
 app.notFound((c) => c.json({ error: 'Not found' }, 404))

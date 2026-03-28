@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ChatPanel } from './components/ChatPanel'
@@ -8,7 +8,10 @@ import { DashboardPanel } from './components/DashboardPanel'
 import { PaymentCheckoutPage } from './components/PaymentCheckoutPage'
 import { PaymentResultPage } from './components/PaymentResultPage'
 import { PricingPage } from './components/PricingPage'
+import { OnboardingModal } from './components/OnboardingModal'
+import { UsageProgress } from './components/UsageProgress'
 import { useAuth } from './hooks/useAuth'
+import { useUsage } from './hooks/useUsage'
 import {
   detectLanguageFromPath,
   getDefaultLanguage,
@@ -24,6 +27,10 @@ function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
+  const { used, limit, isPro } = useUsage()
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem('ai_tools_onboarded'),
+  )
   const currentLanguage = isSupportedLanguage(params.lang)
     ? params.lang
     : getDefaultLanguage()
@@ -104,6 +111,7 @@ function AppShell() {
               </button>
             ))}
           </div>
+          <UsageProgress used={used} limit={limit} isPro={isPro} />
           <span className="text-xs text-gray-500">{user?.email}</span>
           <button
             onClick={logout}
@@ -126,6 +134,10 @@ function AppShell() {
           <Route path="*" element={<Navigate to="chat" replace />} />
         </Routes>
       </main>
+
+      {showOnboarding && (
+        <OnboardingModal onComplete={() => setShowOnboarding(false)} />
+      )}
     </div>
   )
 }

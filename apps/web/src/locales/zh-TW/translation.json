@@ -157,6 +157,33 @@
     "cta": "升級 Pro 方案 NT$99/月",
     "dismiss": "稍後再說"
   },
+  "onboarding": {
+    "title": "歡迎使用 AI Tools！",
+    "subtitle": "你有 10 次免費額度，馬上來試試吧！",
+    "feature": {
+      "chat": {
+        "title": "聊天",
+        "desc": "和 AI 自由對話，解答任何問題"
+      },
+      "tools": {
+        "title": "工具",
+        "desc": "摘要、翻譯、解釋程式碼，一鍵搞定"
+      },
+      "dashboard": {
+        "title": "儀表板",
+        "desc": "追蹤使用量與 AI 分析紀錄"
+      }
+    },
+    "cta": "開始使用！試試工具 → 摘要",
+    "skip": "我先自己探索",
+    "toolsHint": "從這裡開始！貼上一段文字，AI 幫你濃縮成重點 ✨",
+    "toolsHintDismiss": "我知道了"
+  },
+  "usage": {
+    "counter": "今日 {{used}}/{{limit}}",
+    "warning": "快用完了！升級 Pro 無限使用",
+    "warningShort": "剩 {{remaining}} 次"
+  },
   "errors": {
     "generic": "抱歉，系統發生錯誤，請稍後再試。",
     "auth": {
