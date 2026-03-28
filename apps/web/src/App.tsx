@@ -3,13 +3,16 @@ import { ChatPanel } from './components/ChatPanel'
 import { ToolPanel } from './components/ToolPanel'
 import { AuthPage } from './components/AuthPage'
 import { DashboardPanel } from './components/DashboardPanel'
+import { LandingPage } from './components/LandingPage'
 import { useAuth } from './hooks/useAuth'
 
 type Tab = 'chat' | 'tools' | 'dashboard'
+type View = 'landing' | 'auth' | 'app'
 
 export default function App() {
   const { user, loading, isAuthenticated, logout } = useAuth()
   const [tab, setTab] = useState<Tab>('chat')
+  const [view, setView] = useState<View>('landing')
 
   if (loading) {
     return (
@@ -19,8 +22,12 @@ export default function App() {
     )
   }
 
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
+    // Authenticated users go straight to app
+  } else if (view === 'auth') {
     return <AuthPage />
+  } else {
+    return <LandingPage onEnter={() => setView('auth')} />
   }
 
   return (
