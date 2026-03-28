@@ -8,7 +8,8 @@ ENVIRONMENT = "production"
 # Set AI_GATEWAY_URL via dashboard or:
 #   wrangler secret put AI_GATEWAY_URL
 # Format: https://gateway.ai.cloudflare.com/v1/{account-id}/ai-tools-gateway
-AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/a1540e7bbaec0f1785a7f339ef92f1a1/ai-tools-gateway"
+# NOTE: Disabled until AI Gateway is verified in CF dashboard — Workers AI runs directly
+# AI_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/a1540e7bbaec0f1785a7f339ef92f1a1/ai-tools-gateway"
 
 # ─── Secrets (set via wrangler secret put) ───────────────────────────────────
 # ANTHROPIC_API_KEY — required for claude-haiku / claude-sonnet model selection
