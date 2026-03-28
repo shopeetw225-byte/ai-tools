@@ -95,12 +95,13 @@ tools.post('/:name', async (c) => {
   const prompt = TOOL_PROMPTS[name](body.input, body.options ?? {})
 
   // Record tool run start in D1 (best-effort)
+  const userId = c.get('userId' as never) as string
   let toolRunId: string | undefined
   try {
     const result = await c.env.DB.prepare(
-      `INSERT INTO tool_runs (user_id, tool_name, input, status) VALUES ('anonymous', ?, ?, 'running') RETURNING id`,
+      `INSERT INTO tool_runs (user_id, tool_name, input, status) VALUES (?, ?, ?, 'running') RETURNING id`,
     )
-      .bind(name, body.input.slice(0, 1000))
+      .bind(userId, name, body.input.slice(0, 1000))
       .first<{ id: string }>()
     toolRunId = result?.id
   } catch {

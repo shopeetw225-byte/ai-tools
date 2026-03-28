@@ -28,6 +28,11 @@ const CLAUDE_MODELS: Record<string, string> = {
 const FRIENDLY_CHAT_ERROR =
   "Sorry, I couldn't generate a response right now. Please try again."
 
+/** Per-message content limit (characters). Prevents DoS via oversized payloads. */
+const MAX_MESSAGE_CHARS = 10_000
+/** Maximum number of messages in a single chat request. */
+const MAX_MESSAGES_PER_REQUEST = 50
+
 const chat = new Hono<{ Bindings: Env }>()
 
 chat.get('/models', (c) => {
@@ -79,6 +84,16 @@ chat.post('/', async (c) => {
 
   if (!body.messages?.length) {
     return c.json({ error: 'messages required' }, 400)
+  }
+
+  if (body.messages.length > MAX_MESSAGES_PER_REQUEST) {
+    return c.json({ error: `Too many messages (max ${MAX_MESSAGES_PER_REQUEST})` }, 400)
+  }
+
+  for (const msg of body.messages) {
+    if (msg.content && msg.content.length > MAX_MESSAGE_CHARS) {
+      return c.json({ error: `Message exceeds maximum length of ${MAX_MESSAGE_CHARS} characters` }, 400)
+    }
   }
 
   const model: ModelChoice = body.model ?? 'workers-ai'

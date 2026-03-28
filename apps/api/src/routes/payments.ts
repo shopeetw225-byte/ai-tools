@@ -141,7 +141,7 @@ payments.post('/ecpay/return', async (c) => {
 })
 
 // OrderResultURL: browser redirect from ECPay (POST with result data)
-// Verifies signature, then redirects to frontend result page
+// Verifies CheckMacValue signature, then redirects to frontend result page
 payments.post('/ecpay/result', async (c) => {
   if (!c.env.ECPAY_HASH_KEY || !c.env.ECPAY_HASH_IV) {
     return c.redirect('/zh-TW/payment/result?status=error', 302)
@@ -165,6 +165,17 @@ payments.post('/ecpay/result', async (c) => {
 
   if (!valid) {
     return c.redirect('/zh-TW/payment/result?status=error', 302)
+  }
+
+  // Verify CheckMacValue to prevent forged redirects
+  if (c.env.ECPAY_HASH_KEY && c.env.ECPAY_HASH_IV && payload['CheckMacValue']) {
+    const valid = await verifyCheckMacValue(payload, {
+      hashKey: c.env.ECPAY_HASH_KEY,
+      hashIv: c.env.ECPAY_HASH_IV,
+    })
+    if (!valid) {
+      return c.redirect('/zh-TW/payment/result?status=error', 302)
+    }
   }
 
   const order = await c.env.DB

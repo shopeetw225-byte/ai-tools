@@ -16,6 +16,10 @@ export type Env = {
   ECPAY_HASH_IV?: string
   /** Required for AI Gateway Analytics API — set via: wrangler secret put CLOUDFLARE_API_TOKEN */
   CLOUDFLARE_API_TOKEN?: string
+  /** Comma-separated user IDs allowed to access admin endpoints (analytics). */
+  ADMIN_USER_IDS?: string
+  /** Comma-separated allowed CORS origins for production. */
+  ALLOWED_ORIGINS?: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
@@ -35,7 +39,18 @@ function pickLanguageFromAcceptLanguage(header: string | null): 'zh-TW' | 'zh-CN
 app.use('*', logger())
 app.use('*', secureHeaders())
 app.use('/api/*', cors({
-  origin: (origin) => origin, // restrict in production
+  origin: (origin, c) => {
+    const env = (c as unknown as { env: Env }).env?.ENVIRONMENT
+    // In production, only allow same-origin or explicitly configured origins
+    if (env === 'production') {
+      const allowed = ((c as unknown as { env: Env }).env?.ALLOWED_ORIGINS ?? '').split(',').map((s: string) => s.trim()).filter(Boolean)
+      if (allowed.length > 0 && allowed.includes(origin)) return origin
+      // Reject unknown origins in production
+      return ''
+    }
+    // Development: allow all origins for local testing
+    return origin
+  },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }))

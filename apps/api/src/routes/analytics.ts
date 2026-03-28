@@ -167,7 +167,14 @@ function parseGatewayUrl(
 }
 
 // GET /api/v1/analytics/gateway
+// Admin-only: exposes company-wide cost data
 analytics.get('/gateway', async (c) => {
+  const userId = c.get('userId' as never) as string | undefined
+  const adminIds = (c.env.ADMIN_USER_IDS ?? '').split(',').map((s: string) => s.trim()).filter(Boolean)
+  if (!userId || (adminIds.length > 0 && !adminIds.includes(userId))) {
+    return c.json({ error: 'Forbidden: admin access required' }, 403)
+  }
+
   const apiToken = c.env.CLOUDFLARE_API_TOKEN
   const gatewayUrl = c.env.AI_GATEWAY_URL
 
