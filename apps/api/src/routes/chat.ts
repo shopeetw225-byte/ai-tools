@@ -144,11 +144,11 @@ chat.post('/', async (c) => {
           // Workers AI — route through AI Gateway when URL is configured
           const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
           const aiStream = await executeWithRetry(
-            async () =>
+            async (signal) =>
               (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
                 WORKERS_AI_MODEL,
                 { messages, stream: true },
-                gatewayOptions,
+                { ...gatewayOptions, signal },
               ),
             {
               timeoutMs: AI_REQUEST_TIMEOUT_MS,

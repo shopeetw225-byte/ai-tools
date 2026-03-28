@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import type { Env } from '../index'
-import { workersAIGatewayOptions } from '../lib/ai-gateway'
+import { workersAIGatewayOptions, executeWithRetry, AI_REQUEST_TIMEOUT_MS, AI_MAX_ATTEMPTS } from '../lib/ai-gateway'
 
 type ToolName = 'summarize' | 'translate' | 'explain-code'
 
@@ -108,12 +108,19 @@ tools.post('/:name', async (c) => {
     // Route through AI Gateway when configured for observability
     const gatewayOptions = workersAIGatewayOptions(c.env.AI_GATEWAY_URL)
 
-    const response = await (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
-      '@cf/meta/llama-3.1-8b-instruct',
+    const response = await executeWithRetry(
+      async (signal) =>
+        (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
+          '@cf/meta/llama-3.1-8b-instruct',
+          {
+            messages: [{ role: 'user', content: prompt }],
+          },
+          { ...gatewayOptions, signal },
+        ),
       {
-        messages: [{ role: 'user', content: prompt }],
+        timeoutMs: AI_REQUEST_TIMEOUT_MS,
+        maxAttempts: AI_MAX_ATTEMPTS,
       },
-      gatewayOptions,
     ) as { response: string }
 
     const output = response.response ?? ''

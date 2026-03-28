@@ -104,8 +104,14 @@ export async function executeWithRetry<T>(
   const timeoutMs = options.timeoutMs ?? AI_REQUEST_TIMEOUT_MS
   const baseDelayMs = options.baseDelayMs ?? AI_RETRY_BASE_DELAY_MS
   const sleep = options.sleep ?? wait
+  const deadline = Date.now() + timeoutMs
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const remainingMs = deadline - Date.now()
+    if (remainingMs <= 0) {
+      throw new AIRequestTimeoutError(timeoutMs)
+    }
+
     const controller = new AbortController()
     const timeoutError = new AIRequestTimeoutError(timeoutMs)
     let timeout: ReturnType<typeof setTimeout> | undefined
@@ -113,7 +119,7 @@ export async function executeWithRetry<T>(
       timeout = setTimeout(() => {
         controller.abort(timeoutError)
         reject(timeoutError)
-      }, timeoutMs)
+      }, remainingMs)
     })
 
     try {
@@ -130,7 +136,12 @@ export async function executeWithRetry<T>(
         throw normalized
       }
 
-      await sleep(baseDelayMs * 2 ** (attempt - 1))
+      const remainingDelayBudgetMs = deadline - Date.now()
+      if (remainingDelayBudgetMs <= 0) {
+        throw new AIRequestTimeoutError(timeoutMs, normalized)
+      }
+
+      await sleep(Math.min(baseDelayMs * 2 ** (attempt - 1), remainingDelayBudgetMs))
     } finally {
       if (timeout) clearTimeout(timeout)
     }

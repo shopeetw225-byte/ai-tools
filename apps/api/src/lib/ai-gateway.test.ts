@@ -111,6 +111,39 @@ describe('executeWithRetry', () => {
     vi.useRealTimers()
   })
 
+  it('enforces a single timeout budget across all retry attempts', async () => {
+    vi.useFakeTimers()
+
+    const operation = vi.fn(
+      () =>
+        new Promise<never>(() => {
+          // Intentionally never resolves or rejects.
+        }),
+    )
+
+    const pending = executeWithRetry(operation, {
+      maxAttempts: 3,
+      timeoutMs: 30,
+      baseDelayMs: 5,
+    })
+    const status = { value: 'pending' as 'pending' | 'rejected' | 'resolved' }
+    void pending.then(
+      () => {
+        status.value = 'resolved'
+      },
+      () => {
+        status.value = 'rejected'
+      },
+    )
+
+    await vi.advanceTimersByTimeAsync(30)
+
+    expect(status.value).toBe('rejected')
+    expect(operation).toHaveBeenCalledTimes(1)
+
+    vi.useRealTimers()
+  })
+
   it('times out stalled Anthropic gateway streams while reading', async () => {
     vi.useFakeTimers()
 
