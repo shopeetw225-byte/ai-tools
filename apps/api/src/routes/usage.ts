@@ -26,6 +26,7 @@ usage.get('/today', async (c) => {
   }
 
   const isTrial = isPro && !!sub?.trial_started_at
+  const trialExpiresAt = isTrial && sub?.expires_at ? sub.expires_at : null
   const trialDaysRemaining = isTrial && sub?.expires_at
     ? Math.max(0, Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (24 * 60 * 60 * 1000)))
     : null
@@ -41,7 +42,9 @@ usage.get('/today', async (c) => {
     used: row?.count ?? 0,
     limit: FREE_DAILY_LIMIT,
     isPro,
+    plan: sub?.plan ?? 'free',
     isTrial,
+    trialExpiresAt,
     trialDaysRemaining,
     trialUsed: !!sub?.trial_used,
   })

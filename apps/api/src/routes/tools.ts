@@ -116,7 +116,7 @@ tools.post('/:name', async (c) => {
       async (signal) => {
         const opts = gatewayOptions ? { ...gatewayOptions, signal } : { signal }
         return (c.env.AI.run as (...args: unknown[]) => Promise<unknown>)(
-          '@cf/meta/llama-3.1-8b-instruct',
+          '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
           {
             messages: [{ role: 'user', content: prompt }],
           },
