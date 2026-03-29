@@ -1,6 +1,9 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link, useParams } from 'react-router-dom'
 import { ToolsHintBanner } from './ToolsHintBanner'
+import { useUsage } from '../hooks/useUsage'
+import { isSupportedLanguage, getDefaultLanguage } from '../lib/i18n-routing'
 
 type ToolId = 'summarize' | 'translate' | 'explain-code'
 
@@ -60,6 +63,10 @@ import { API_BASE } from '../lib/api'
 
 export function ToolPanel() {
   const { t } = useTranslation()
+  const params = useParams<{ lang: string }>()
+  const lang = isSupportedLanguage(params.lang) ? params.lang : getDefaultLanguage()
+  const { isPro, isTrial, trialUsed } = useUsage()
+  const showTrialCta = !isPro && !isTrial && !trialUsed
   const [activeTool, setActiveTool] = useState<Tool>(TOOLS[0])
   const [input, setInput] = useState('')
   const [output, setOutput] = useState('')
@@ -195,6 +202,22 @@ export function ToolPanel() {
         <h2 className="font-semibold text-white">{t('tools.title')}</h2>
         <p className="text-xs text-gray-500">{t('tools.subtitle')}</p>
       </div>
+
+      {/* Trial CTA banner — shown to free users who haven't tried trial */}
+      {showTrialCta && (
+        <div className="mx-4 mt-3 flex items-center justify-between rounded-lg border border-blue-800 bg-blue-950/50 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-blue-300">{t('trial.toolsPanelCta')}</p>
+            <p className="text-xs text-blue-400/80">{t('trial.toolsPanelCtaDesc')}</p>
+          </div>
+          <Link
+            to={`/${lang}/pricing`}
+            className="ml-4 shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-500 transition-colors"
+          >
+            {t('trial.upgradeNow')}
+          </Link>
+        </div>
+      )}
 
       {/* Tool Tabs */}
       <div className="flex flex-wrap gap-1 px-3 py-2 border-b border-gray-800 sm:px-4">

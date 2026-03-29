@@ -32,7 +32,7 @@ function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const params = useParams<{ lang: string }>()
-  const { used, limit, isPro, isTrial, trialDaysRemaining } = useUsage()
+  const { used, limit, isPro, isTrial, trialDaysRemaining, trialUsed } = useUsage()
   const streak = useStreak()
   const [showOnboarding, setShowOnboarding] = useState(
     () => !localStorage.getItem('ai_tools_onboarded'),
@@ -144,6 +144,26 @@ function AppShell() {
           </nav>
         </div>
       </header>
+
+      {/* Trial expiry warning banner */}
+      {isTrial && trialDaysRemaining !== null && trialDaysRemaining <= 1 && (
+        <div className="bg-orange-900/60 border-b border-orange-700 px-4 py-2 text-center text-sm text-orange-200">
+          {t('trial.expiringBanner')}{' '}
+          <Link to={`/${currentLanguage}/pricing`} className="underline font-medium hover:text-orange-100">
+            {t('trial.upgradeNow')}
+          </Link>
+        </div>
+      )}
+
+      {/* Trial expired banner */}
+      {trialUsed && !isPro && !isTrial && (
+        <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 text-center text-sm text-gray-300">
+          {t('trial.expiredBanner')}{' '}
+          <Link to={`/${currentLanguage}/pricing`} className="underline font-medium text-blue-400 hover:text-blue-300">
+            {t('trial.upgradeNow')}
+          </Link>
+        </div>
+      )}
 
       <main className="mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col px-0 sm:px-4">
         <Routes>

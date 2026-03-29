@@ -194,7 +194,11 @@
     "cannotSubscribe": "试用期间无法启动付费订阅，请等待试用结束后再升级",
     "confirmTitle": "开始免费试用？",
     "confirmMessage": "您即将启动 Pro 7 天免费试用。试用期间可体验所有 Pro 功能，每个账号仅限一次。",
-    "confirmStart": "确认开始试用"
+    "confirmStart": "确认开始试用",
+    "expiredBanner": "您的 Pro 试用已结束，立即升级继续使用所有功能",
+    "toolsPanelCta": "解锁所有 AI 工具",
+    "toolsPanelCtaDesc": "升级 Pro，享受无限制摘要、翻译、代码解释",
+    "upgradeNow": "立即升级 Pro"
   },
   "common": {
     "cancel": "取消"
