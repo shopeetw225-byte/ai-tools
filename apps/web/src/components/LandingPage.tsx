@@ -186,12 +186,46 @@ export function LandingPage() {
                 >
                   {highlighted ? t('landing.pricing.cta') : t('landing.hero.cta')}
                 </button>
+                {highlighted && (
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    {t('landing.pricing.ctaNote')}
+                  </p>
+                )}
               </div>
             ))}
           </div>
           <p className="text-xs text-gray-500 text-center mt-6">
             {t('pricing.paymentMethods')}
           </p>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="px-4 py-16 border-t border-gray-800/50">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-12">
+            {t('landing.faq.title')}
+          </h2>
+          <div className="space-y-3">
+            {(t('landing.faq.items', { returnObjects: true }) as Array<{ q: string; a: string }>).map(
+              (item, i) => (
+                <details
+                  key={i}
+                  className="group rounded-xl border border-gray-800 bg-gray-900/40 transition-colors hover:border-gray-700"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 px-6 py-4 text-left text-white font-medium list-none [&::-webkit-details-marker]:hidden">
+                    <span>{item.q}</span>
+                    <span className="shrink-0 text-gray-500 transition-transform group-open:rotate-45 text-xl leading-none">
+                      +
+                    </span>
+                  </summary>
+                  <div className="px-6 pb-4 text-sm text-gray-400 leading-relaxed">
+                    {item.a}
+                  </div>
+                </details>
+              ),
+            )}
+          </div>
         </div>
       </section>
 
