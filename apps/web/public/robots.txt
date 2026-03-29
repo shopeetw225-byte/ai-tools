@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /zh-TW/
+Allow: /zh-CN/
+Allow: /zh-TW/pricing
+Allow: /zh-CN/pricing
+Allow: /zh-TW/privacy
+Allow: /zh-CN/privacy
+Disallow: /zh-TW/chat
+Disallow: /zh-CN/chat
+Disallow: /zh-TW/resume
+Disallow: /zh-CN/resume
+Disallow: /zh-TW/grammar
+Disallow: /zh-CN/grammar
+Disallow: /zh-TW/tools
+Disallow: /zh-CN/tools
+Disallow: /zh-TW/dashboard
+Disallow: /zh-CN/dashboard
+
+Sitemap: https://ai-tools-15z.pages.dev/sitemap.xml
