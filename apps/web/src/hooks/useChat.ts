@@ -164,10 +164,19 @@ export function useChat() {
 
       if (!res.ok || !res.body) {
         setStatus('error')
+        let errorContent = `HTTP ${res.status} error`
+        if (res.status === 429) {
+          try {
+            const errData = await res.json() as { error?: string }
+            if (errData.error === 'quota_exceeded') {
+              errorContent = '今日免費額度已用完（10 次），升級 Pro 可繼續無限對話'
+            }
+          } catch { /* keep default */ }
+        }
         setMessages(prev =>
           prev.map(m =>
             m.id === assistantMsgId
-              ? { ...m, content: `HTTP ${res.status} error`, state: 'error' as const }
+              ? { ...m, content: errorContent, state: 'error' as const }
               : m,
           ),
         )
@@ -255,10 +264,19 @@ export function useChat() {
 
       if (!res.ok || !res.body) {
         setStatus('error')
+        let errorContent = `HTTP ${res.status} error`
+        if (res.status === 429) {
+          try {
+            const errData = await res.json() as { error?: string }
+            if (errData.error === 'quota_exceeded') {
+              errorContent = '今日免費額度已用完（10 次），升級 Pro 可繼續無限對話'
+            }
+          } catch { /* keep default */ }
+        }
         setMessages(prev =>
           prev.map(m =>
             m.id === assistantMsgId
-              ? { ...m, content: `HTTP ${res.status} error`, state: 'error' as const }
+              ? { ...m, content: errorContent, state: 'error' as const }
               : m,
           ),
         )

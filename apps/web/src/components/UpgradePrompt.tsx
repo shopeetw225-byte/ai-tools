@@ -39,6 +39,7 @@ export function UpgradePrompt({ count, limit, onDismiss }: UpgradePromptProps) {
           >
             {t('upgrade.cta')}
           </button>
+          <p className="text-xs text-gray-500 text-center">{t('upgrade.ctaNote')}</p>
           <button
             onClick={onDismiss}
             className="w-full py-2 text-gray-400 text-sm hover:text-gray-200 transition-colors"
