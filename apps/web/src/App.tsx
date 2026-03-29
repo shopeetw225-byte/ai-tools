@@ -38,6 +38,10 @@ function AppShell() {
     () => !localStorage.getItem('ai_tools_onboarded'),
   )
   const [showEngagementUpsell, setShowEngagementUpsell] = useState(false)
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => {
+    const dismissed = localStorage.getItem('ai_tools_trial_banner_dismissed')
+    return dismissed === new Date().toISOString().split('T')[0]
+  })
 
   useEffect(() => {
     if (streak >= 3 && !isPro && !localStorage.getItem('ai_tools_upsell_dismissed')) {
@@ -145,13 +149,53 @@ function AppShell() {
         </div>
       </header>
 
-      {/* Trial expiry warning banner */}
-      {isTrial && trialDaysRemaining !== null && trialDaysRemaining <= 1 && (
-        <div className="bg-orange-900/60 border-b border-orange-700 px-4 py-2 text-center text-sm text-orange-200">
-          {t('trial.expiringBanner')}{' '}
-          <Link to={`/${currentLanguage}/pricing`} className="underline font-medium hover:text-orange-100">
+      {/* Trial expiry warning banner — 3 tiers: orange (5-3d), red (2-1d), deep red + pulse (0d) */}
+      {isTrial && trialDaysRemaining !== null && trialDaysRemaining <= 5 && !trialBannerDismissed && (
+        <div
+          className={`border-b px-4 py-2 text-center text-sm relative ${
+            trialDaysRemaining === 0
+              ? 'bg-red-950/80 border-red-600 text-red-100 animate-pulse'
+              : trialDaysRemaining <= 2
+                ? 'bg-red-900/60 border-red-700 text-red-200'
+                : 'bg-orange-900/60 border-orange-700 text-orange-200'
+          }`}
+        >
+          <span className="sm:inline hidden">
+            {trialDaysRemaining === 0
+              ? t('trial.expiringBannerToday')
+              : trialDaysRemaining === 1
+                ? t('trial.expiringBannerTomorrow')
+                : t('trial.expiringBanner', { days: trialDaysRemaining })}
+          </span>
+          <span className="sm:hidden inline">
+            {trialDaysRemaining === 0
+              ? t('trial.expiringBannerToday')
+              : t('trial.badge', { days: trialDaysRemaining })}
+          </span>
+          {' '}
+          <Link
+            to={`/${currentLanguage}/pricing`}
+            className={`underline font-medium ${
+              trialDaysRemaining <= 2 ? 'hover:text-red-100' : 'hover:text-orange-100'
+            }`}
+          >
             {t('trial.upgradeNow')}
           </Link>
+          <button
+            onClick={() => {
+              localStorage.setItem('ai_tools_trial_banner_dismissed', new Date().toISOString().split('T')[0])
+              setTrialBannerDismissed(true)
+            }}
+            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-white/10 transition-colors ${
+              trialDaysRemaining <= 2 ? 'text-red-300' : 'text-orange-300'
+            }`}
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
         </div>
       )}
 
