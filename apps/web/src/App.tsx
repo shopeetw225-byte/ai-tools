@@ -197,6 +197,7 @@ function AppShell() {
       {showEngagementUpsell && !showOnboarding && (
         <EngagementUpsell
           streak={streak}
+          trialUsed={trialUsed}
           onDismiss={() => {
             localStorage.setItem('ai_tools_upsell_dismissed', new Date().toISOString().split('T')[0])
             setShowEngagementUpsell(false)

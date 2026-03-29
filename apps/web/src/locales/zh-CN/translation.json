@@ -222,6 +222,7 @@
     "title": "🔥 连续 {{streak}} 天使用！",
     "description": "你已经是 AI Tools 的忠实用户了！升级 Pro 享受无限使用，不再受每日额度限制。",
     "cta": "升级 Pro — NT$99/月",
+    "ctaTrial": "免费试用 Pro 7 天",
     "dismiss": "继续免费使用"
   },
   "resume": {

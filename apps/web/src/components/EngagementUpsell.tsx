@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 
 type EngagementUpsellProps = {
   streak: number
+  trialUsed: boolean
   onDismiss: () => void
 }
 
-export function EngagementUpsell({ streak, onDismiss }: EngagementUpsellProps) {
+export function EngagementUpsell({ streak, trialUsed, onDismiss }: EngagementUpsellProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { lang } = useParams<{ lang: string }>()
@@ -37,7 +38,7 @@ export function EngagementUpsell({ streak, onDismiss }: EngagementUpsellProps) {
             onClick={() => navigate(`/${lang}/pricing`)}
             className="w-full py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-lg hover:from-orange-600 hover:to-red-600 transition-all"
           >
-            {t('engagementUpsell.cta')}
+            {trialUsed ? t('engagementUpsell.cta') : t('engagementUpsell.ctaTrial')}
           </button>
           <button
             onClick={onDismiss}
